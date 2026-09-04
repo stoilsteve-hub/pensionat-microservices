@@ -80,6 +80,8 @@ public class FrontendController {
                         @RequestParam(required = false) Boolean returnToBook,
                         @RequestParam(required = false) Long roomId) {
         CustomerResponseDTO responseDTO = customerService.loginCustomer(customer.getEmail(), customer.getPassword());
+        System.out.println("Feedback: " + responseDTO.getFeedback());
+        System.out.println("CustomerDTO: " + responseDTO.getCustomerDTO());
         if (responseDTO.getFeedback() == Feedback.OK) {
             session.setAttribute("loginCustomerId", responseDTO.getCustomerDTO().getId());
             if (Boolean.TRUE.equals(returnToBook) && roomId != null) {
@@ -88,7 +90,7 @@ public class FrontendController {
             return "redirect:/profile";
         }
         model.addAttribute("error", responseDTO.getFeedback().feedback);
-        model.addAttribute("loginCustomer", responseDTO.getCustomerDTO());
+        model.addAttribute("loginCustomer", customer);
         model.addAttribute("signupCustomer", new CustomerDTO());
         return "customer";
     }
@@ -106,7 +108,7 @@ public class FrontendController {
             return "redirect:/profile";
         }
         model.addAttribute("signupError", responseDTO.getFeedback().feedback);
-        model.addAttribute("signupCustomer", responseDTO.getCustomerDTO());
+        model.addAttribute("signupCustomer", customer);
         model.addAttribute("loginCustomer", new CustomerDTO());
         return "customer";
     }

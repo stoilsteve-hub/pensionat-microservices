@@ -24,16 +24,16 @@ public class CustomerService {
     }
 
     public CustomerResult loginRequestIsValid(LoginRequestDTO requestDTO) {
-        return loginCustomer(requestDTO.getEmail(), requestDTO.getPassword());
+        CustomerResult result = loginCustomer(requestDTO.getEmail(), requestDTO.getPassword());
+        System.out.println("result in loginRequestIsValid: " + result.feedback());
+        return result;
     }
 
     public CustomerResult signupRequestIsValid(CustomerDTO dto) {
         if (dto.getEmail() == null || dto.getEmail().isBlank()) {
-            System.out.println("empty email");
             return new CustomerResult(null, Feedback.EMPTY_EMAIL);
         }
         if (dto.getPassword() == null || dto.getPassword().isBlank()) {
-            System.out.println("empty password");
             return new CustomerResult(null, Feedback.EMPTY_PASSWORD);
         }
         return createCustomer(dto);
