@@ -10,7 +10,7 @@ import java.util.Date;
 
 @Service
 public class JwtService {
-    private static final String JWT_SECRET = "min-hemliga-nyckel-minst-32-tecken!!";
+    private static final String JWT_SECRET = System.getenv("JWT_KEY");
 
     private SecretKey getSignInKey(){
         byte[] bytes = JWT_SECRET.getBytes(StandardCharsets.UTF_8);
