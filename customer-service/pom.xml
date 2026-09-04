@@ -13,10 +13,10 @@
 	</parent>
 
 	<groupId>com.example</groupId>
-	<artifactId>testing-spring-boot</artifactId>
+	<artifactId>customer-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>testing-spring-boot</name>
-	<description>Testing Spring Boot project</description>
+	<description>Customer-service</description>
 
 	<properties>
 		<java.version>17</java.version>

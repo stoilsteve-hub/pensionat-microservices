@@ -38,8 +38,27 @@ public class CustomerService {
     }
 
     public CustomerResponseDTO signupCustomer(CustomerDTO dto) {
+        System.out.println("signupCustomer is called");
+        if (dto != null){
+            System.out.println("dto != null");
+            if (dto.getEmail() != null && dto.getEmail().isBlank()){
+                System.out.println("email is: " + dto.getEmail());
+            }
+            else {
+                System.out.println("email is null");
+            }
+        }
+        else {
+            System.out.println("dto is null");
+        }
         try {
             CustomerDTO response = restTemplate.postForObject(customerServiceUrl + "/signup", dto, CustomerDTO.class);
+            if (response != null){
+                System.out.println("response != null");
+            }
+            else {
+                System.out.println("response is null");
+            }
             return (response != null) ? new CustomerResponseDTO(response, Feedback.OK) :
                     new CustomerResponseDTO(Feedback.CUSTOMER_SERVICE_UNAVAILABLE);
         } catch (ResourceAccessException e) {
