@@ -2,6 +2,7 @@ package com.example.customer_service.controller;
 
 import com.example.customer_service.model.*;
 import com.example.customer_service.service.CustomerService;
+import com.example.customer_service.service.JwtService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,9 +12,11 @@ import java.util.List;
 @RequestMapping("/api/customers")
 public class CustomerRestController {
     private final CustomerService customerService;
+    private final JwtService jwtService;
 
-    public CustomerRestController(CustomerService customerService) {
+    public CustomerRestController(CustomerService customerService, JwtService jwtService) {
         this.customerService = customerService;
+        this.jwtService = jwtService;
     }
 
     @GetMapping
@@ -31,12 +34,16 @@ public class CustomerRestController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<CustomerDTO> customerExists(@RequestBody LoginRequestDTO requestDTO){
+    public ResponseEntity<LoginResponseDTO> customerExists(@RequestBody LoginRequestDTO requestDTO){
         CustomerResult result = customerService.loginRequestIsValid(requestDTO);
         if (result.feedback() != Feedback.OK){
             return ResponseEntity.status(getStatusFromFeedback(result.feedback(), false)).build();
         }
-        return ResponseEntity.ok(result.dto());
+        String token = jwtService.generateToken(
+                result.dto().getId(),
+                result.dto().getEmail());
+
+        return ResponseEntity.ok(new LoginResponseDTO(result.dto(),token));
     }
 
     @PostMapping("/signup")

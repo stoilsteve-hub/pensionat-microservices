@@ -17,16 +17,26 @@ public class JwtService {
         return Keys.hmacShaKeyFor(bytes);
     }
 
-    public String generateToken(String username){
+    public String generateToken(Long customerId, String email){
         return Jwts.builder()
-                .subject(username)
+                .subject(email)
+                .claim("customerId", customerId)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 86400000))
                 .signWith(getSignInKey())
                 .compact();
     }
 
-    public String extractUsername(String token){
+    public Long extractCustomerId(String token){
+        return Jwts.parser()
+                .verifyWith(getSignInKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("customerId", Long.class);
+    }
+
+    public String extractEmail(String token){
         return Jwts.parser()
                 .verifyWith(getSignInKey())
                 .build()
@@ -36,7 +46,7 @@ public class JwtService {
 
     public boolean isTokenValid(String token){
         try{
-            extractUsername(token);
+            extractEmail(token);
             return true;
         } catch(Exception e){return false;}
     }
