@@ -56,8 +56,16 @@ public class CustomerRestController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CustomerDTO> updateCustomer(@PathVariable Long id, @RequestBody CustomerDTO customer) {
+    public ResponseEntity<CustomerDTO> updateCustomer(
+            @PathVariable Long id, @RequestBody CustomerDTO customer, @RequestHeader("Authorization") String authorization) {
+        String token = authorization.substring(7);
+        Long authenticatedCustomerId = jwtService.extractCustomerId(token);
+
+        if (!authenticatedCustomerId.equals(id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         CustomerResult updated = customerService.updateCustomer(id, customer);
+
         if (updated != null) {
             return ResponseEntity.ok(updated.dto());
         }
@@ -65,9 +73,18 @@ public class CustomerRestController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteCustomer(
+            @PathVariable Long id, @RequestHeader("Authorization") String authorization) {
+
+        String token = authorization.substring(7);
+        Long authenticatedCustomerId = jwtService.extractCustomerId(token);
+
+        if (!authenticatedCustomerId.equals(id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         CustomerResult result = customerService.deleteCustomer(id);
-        if (result.feedback() != Feedback.OK){
+
+        if (result.feedback() != Feedback.OK) {
             return ResponseEntity.status(getStatusFromFeedback(result.feedback(), false)).build();
         }
         return ResponseEntity.ok().build();

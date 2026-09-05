@@ -1,10 +1,7 @@
 package com.example.bookingapp.service;
 
 import com.example.bookingapp.config.RestTemplateConfig;
-import com.example.bookingapp.model.CustomerDTO;
-import com.example.bookingapp.model.CustomerResponseDTO;
-import com.example.bookingapp.model.Feedback;
-import com.example.bookingapp.model.LoginRequestDTO;
+import com.example.bookingapp.model.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
@@ -27,8 +24,8 @@ public class CustomerService {
     public CustomerResponseDTO loginCustomer(String email, String password) {
         try {
             LoginRequestDTO request = new LoginRequestDTO(email, password);
-            CustomerDTO response = restTemplate.postForObject(customerServiceUrl + "/login", request, CustomerDTO.class);
-            return (response != null) ? new CustomerResponseDTO(response, Feedback.OK) :
+            LoginResponseDTO response = restTemplate.postForObject(customerServiceUrl + "/login", request, LoginResponseDTO.class);
+            return (response != null) ? new CustomerResponseDTO(response.getCustomer(), Feedback.OK):
                     new CustomerResponseDTO(Feedback.CUSTOMER_SERVICE_UNAVAILABLE);
         } catch (ResourceAccessException e) {
             return new CustomerResponseDTO(Feedback.CUSTOMER_SERVICE_UNAVAILABLE);

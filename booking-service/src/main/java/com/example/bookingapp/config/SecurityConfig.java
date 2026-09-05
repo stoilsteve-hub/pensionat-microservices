@@ -20,7 +20,10 @@ public class SecurityConfig {
         return http
                 .csrf(c -> c.disable())
                 .authorizeHttpRequests(a -> a
-                        .anyRequest().authenticated())
+                        .requestMatchers(
+                                "/bookings/availability/**",
+                                "/bookings/room/**")
+                        .permitAll().anyRequest().authenticated())
                 .sessionManagement(s -> s.sessionCreationPolicy(
                         SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter,

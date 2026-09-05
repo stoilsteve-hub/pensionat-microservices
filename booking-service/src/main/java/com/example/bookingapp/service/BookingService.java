@@ -121,33 +121,42 @@ public class BookingService {
         return true;
     }
 
-    public BookingResult updateBooking(Long bookingId, BookingDTO booking) {
+    public BookingResult updateBooking(Long bookingId, BookingDTO booking, Long customerId) {
         Booking existing = bookingRepo.findById(bookingId).orElse(null);
-        if (existing != null) {
-            if (!checkDateValidity(booking.getStartdate(), booking.getEnddate())) {
-                return toResult(null, BookingResultStatus.INVALID_DATES);
-            }
-            if (checkRoomAvailability(booking.getRoomid(), booking.getStartdate(), booking.getEnddate(), existing.getId())) {
-                existing.setRoomid(booking.getRoomid());
-                existing.setGuestcount(booking.getGuestcount());
-                existing.setStartdate(booking.getStartdate());
-                existing.setEnddate(booking.getEnddate());
-                existing.setExtrabed(booking.isExtrabed());
-                existing.setCost(booking.getCost());
-                return toResult(bookingRepo.save(existing), BookingResultStatus.OK);
-            }
-            return toResult(null, BookingResultStatus.ROOM_UNAVAILABLE);
+
+        if (existing == null) {return toResult(null, BookingResultStatus.NOT_FOUND);
         }
-        return toResult(null, BookingResultStatus.NOT_FOUND);
+        if (!existing.getCustomerid().equals(customerId)) {
+            return toResult(null, BookingResultStatus.NOT_FOUND);
+        }
+        if (!checkDateValidity(booking.getStartdate(), booking.getEnddate())) {
+            return toResult(null, BookingResultStatus.INVALID_DATES);
+        }
+        if (checkRoomAvailability(booking.getRoomid(), booking.getStartdate(), booking.getEnddate(), existing.getId())) {
+            existing.setRoomid(booking.getRoomid());
+            existing.setGuestcount(booking.getGuestcount());
+            existing.setStartdate(booking.getStartdate());
+            existing.setEnddate(booking.getEnddate());
+            existing.setExtrabed(booking.isExtrabed());
+            existing.setCost(booking.getCost());
+
+            return toResult(bookingRepo.save(existing), BookingResultStatus.OK);
+        }
+        return toResult(null, BookingResultStatus.ROOM_UNAVAILABLE);
     }
 
-    public BookingResult cancelBooking(Long id) {
+    public BookingResult cancelBooking(Long id, Long customerId) {
         Booking existingBooking = bookingRepo.findById(id).orElse(null);
-        if (existingBooking != null) {
-            existingBooking.setStatus(Booking.BookingStatus.CANCELLED);
-            return toResult(bookingRepo.save(existingBooking), BookingResultStatus.OK);
+
+        if (existingBooking == null) {
+            return toResult(null, BookingResultStatus.NOT_FOUND);
         }
-        return toResult(null, BookingResultStatus.NOT_FOUND);
+        if (!existingBooking.getCustomerid().equals(customerId)) {
+            return toResult(null, BookingResultStatus.NOT_FOUND);
+        }
+        existingBooking.setStatus(Booking.BookingStatus.CANCELLED);
+
+        return toResult(bookingRepo.save(existingBooking), BookingResultStatus.OK);
     }
 
     public boolean checkDateValidity(LocalDate startDate, LocalDate endDate) {
