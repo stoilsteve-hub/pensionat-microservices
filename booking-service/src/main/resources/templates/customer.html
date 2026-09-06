@@ -6,82 +6,64 @@
 <div class="container my-5">
     <div class="row g-4 justify-content-center">
         <div class="col-12 col-md-5">
-            <div class="booking-card h-100">
-                <h2 class="text-center mb-4" style="font-family: 'Playfair Display', serif; color: #5f4b45;">Login
-                </h2>
+            <div class="booking-card customer-card h-100">
+                <h2>Login</h2>
                 <div th:if="${error}" class="alert alert-danger text-center" role="alert">
                     <p th:text="${error}" class="m-0"></p>
                 </div>
-                <form th:action="@{/login}" th:object="${loginCustomer}" method="post">
+                <form class="customer-form" th:action="@{/login}" th:object="${loginCustomer}" method="post">
                     <input type="hidden" name="returnToBook" th:value="${param.returnToBook}">
                     <input type="hidden" name="roomId" th:value="${param.roomId}">
                     <div class="mb-3">
-                        <label class="form-label" style="color: #a67b6b;font-size: 0.85rem;
-                                      text-transform: uppercase;letter-spacing: 0.1em;">Email address
-                        </label>
-                        <input type="email" class="form-control" th:field="*{email}" placeholder="Enter email"
-                               required>
+                        <label class="form-label">Email address</label>
+                        <input type="email" class="form-control" th:field="*{email}" placeholder="Enter email" required>
                     </div>
                     <div class="mb-4">
-                        <label class="form-label" style="color: #a67b6b;font-size: 0.85rem; text-transform: uppercase;
-                                      letter-spacing: 0.1em;">Password </label>
-                        <input type="password" class="form-control" th:field="*{password}"
-                               placeholder="Enter password" required>
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" th:field="*{password}" placeholder="Enter password" required>
                     </div>
                     <button type="submit" class="book-btn">Log in</button>
                 </form>
             </div>
         </div>
         <div class="col-12 col-md-1 d-flex justify-content-center align-items-center">
-            <div class="vr d-none d-md-block" style="opacity: 0.15;color: #a67b6b; width: 2px;">
-            </div>
-            <hr class="d-md-none w-100" style="opacity: 0.15;color: #a67b6b;">
+            <div class="vr d-none d-md-block customer-divider"></div>
+            <hr class="d-md-none w-100 customer-divider">
         </div>
         <div class="col-12 col-md-6">
-            <div class="booking-card h-100">
-                <h2 class="text-center mb-4" style="font-family: 'Playfair Display', serif; color: #5f4b45;">Sign Up
-                </h2>
+            <div class="booking-card customer-card h-100">
+                <h2>Sign Up</h2>
                 <div th:if="${signupError}" class="alert alert-danger text-center" role="alert">
                     <p th:text="${signupError}" class="m-0"></p>
                 </div>
-                <form th:action="@{/signup}" th:object="${signupCustomer}" method="post">
+                <form class="customer-form" th:action="@{/signup}" th:object="${signupCustomer}" method="post">
                     <input type="hidden" name="returnToBook" th:value="${param.returnToBook}">
                     <input type="hidden" name="roomId" th:value="${param.roomId}">
                     <div class="row">
                         <div class="col-12 col-lg-6 mb-3">
-                            <label class="form-label" style="color: #a67b6b; font-size: 0.85rem;
-                                          text-transform: uppercase; letter-spacing: 0.1em;">Full name</label>
-                            <input type="text" class="form-control" th:field="*{name}" placeholder="Enter full name"
-                                   required>
+                            <label class="form-label">Full name</label>
+                            <input type="text" class="form-control" th:field="*{name}" placeholder="Enter full name" required>
                         </div>
                         <div class="col-12 col-lg-6 mb-3">
-                            <label class="form-label" style="color: #a67b6b; font-size: 0.85rem;
-                                          text-transform: uppercase; letter-spacing: 0.1em;">Email address</label>
-                            <input type="email" class="form-control" th:field="*{email}" placeholder="Enter email"
-                                   required>
+                            <label class="form-label">Email address</label>
+                            <input type="email" class="form-control" th:field="*{email}" placeholder="Enter email" required>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-12 col-lg-6 mb-3">
-                            <label class="form-label" style="color: #a67b6b;  font-size: 0.85rem;
-                                          text-transform: uppercase;letter-spacing: 0.1em;">Phone number</label>
-                            <input type="text" class="form-control" th:field="*{phone}"
-                                   placeholder="Enter phone number" required>
+                            <label class="form-label">Phone number</label>
+                            <input type="text" class="form-control" th:field="*{phone}" placeholder="Enter phone number" required>
                         </div>
                         <div class="col-12 col-lg-6 mb-3">
-                            <label class="form-label" style="color: #a67b6b; font-size: 0.85rem;
-                                          text-transform: uppercase; letter-spacing: 0.1em;">Password</label>
-                            <input type="password" class="form-control" th:field="*{password}"
-                                   placeholder="Enter password" required>
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" th:field="*{password}" placeholder="Enter password" required>
                         </div>
                     </div>
                     <div class="mb-4">
-                        <label class="form-label" style="color: #a67b6b;font-size: 0.85rem; text-transform: uppercase;
-                                 letter-spacing: 0.1em;">Address</label>
-                        <input type="text" class="form-control" th:field="*{address}" placeholder="Enter address"
-                               required>
+                        <label class="form-label">Address</label>
+                        <input type="text" class="form-control" th:field="*{address}" placeholder="Enter address" required>
                     </div>
-                    <button type="submit" class="book-btn" style="background: #8f817a;">Sign up</button>
+                    <button type="submit" class="book-btn">Sign up</button>
                 </form>
             </div>
         </div>

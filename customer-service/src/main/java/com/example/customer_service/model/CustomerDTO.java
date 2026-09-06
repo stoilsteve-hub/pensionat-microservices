@@ -21,5 +21,4 @@ public class CustomerDTO {
         this.address = address;
         this.phone = phone;
     }
-
 }

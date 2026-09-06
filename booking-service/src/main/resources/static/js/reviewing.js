@@ -4,8 +4,34 @@ let submitButton = null;
 export function leaveReview(roomId, customerId, modalBody, modalFooter) {
     selectedRating = 0;
     submitButton = null;
-    modalBody.innerHTML = `
-        <div class="review-card">
+    modalBody.innerHTML = getReviewModalBody();
+    modalFooter.innerHTML = `<button type="button" class="review-submit-button" disabled>Leave review </button>`;
+    const stars = modalBody.querySelectorAll(".star");
+    const commentSection = modalBody.querySelector(".comment-section");
+    submitButton = modalFooter.querySelector(".review-submit-button");
+    stars.forEach(star => {
+        star.addEventListener("click", () => {
+            selectedRating = Number(star.dataset.rating);
+            updateStars(stars);
+            updateSubmitButton();
+        });
+    });
+    commentSection.addEventListener("input", () => {updateSubmitButton();});
+    submitButton.addEventListener("click", async () => {
+        const review = {
+            roomId: roomId,
+            customerId: customerId,
+            rating: selectedRating,
+            comment: commentSection.value
+        };
+        const response = await sendReview(review);
+        modalBody.innerHTML = getReviewFeedback(response);
+        modalFooter.innerHTML = `<button class="modal-btn modal-btn-primary" data-bs-dismiss="modal">Close</button>`;
+    });
+}
+
+function getReviewModalBody(){
+    return `<div class="review-card">
             <h2 class="text-center review-title">Add review</h2>
             <div class="star-container">
                 <span class="star" data-rating="1">☆</span>
@@ -21,59 +47,32 @@ export function leaveReview(roomId, customerId, modalBody, modalFooter) {
                 </textarea>
             </div>
         </div>`;
-    modalFooter.innerHTML = `<button type="button" class="review-submit-button" disabled>Leave review </button>`;
-    const stars = modalBody.querySelectorAll(".star");
-    const commentSection = modalBody.querySelector(".comment-section");
-    submitButton = modalFooter.querySelector(".review-submit-button");
-    stars.forEach(star => {
-        star.addEventListener("click", () => {
-            selectedRating = Number(star.dataset.rating);
-            updateStars(stars);
-            updateSubmitButton();
-        });
-    });
-    commentSection.addEventListener("input", () => {
-        updateSubmitButton();
-    });
-    submitButton.addEventListener("click", () => {
-        const review = {
-            roomId: roomId,
-            customerId: customerId,
-            rating: selectedRating,
-            comment: commentSection.value
-        };
-        sendReview(review);
-    });
+}
+
+function getReviewFeedback(response){
+    return (response.ok)
+        ? `<div class="text-center"><h3>Thank you!</h3><p>Your review has been submitted.</p></div>`
+        : `<div class="text-center"><h3>Something went wrong</h3><p>Your review could not be submitted.</p></div>`;
 }
 
 function updateStars(stars) {
     stars.forEach(star => {
         const rating = Number(star.dataset.rating);
-        star.textContent = (rating <= selectedRating) ? "★" :  star.textContent = "☆";
+        star.textContent = rating <= selectedRating ? "★" : "☆";
     });
 }
 
 function updateSubmitButton() {
     const comment = document.getElementById("comment-section").value.trim();
-    if (selectedRating > 0 && comment.length > 0) {
-        submitButton.disabled = false;
-    }
-    else {
-        submitButton.disabled = true;
-    }
+    submitButton.disabled = !(selectedRating > 0 && comment.length > 0);
 }
 
 async function sendReview(review) {
-    const response = await fetch("http://localhost:8082/reviews", {
+    return await fetch("http://localhost:8082/reviews", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify(review)
     });
-    if (response.ok) {
-        window.location.reload(); 
-    } else {
-        alert("Failed to submit review.");
-    }
 }

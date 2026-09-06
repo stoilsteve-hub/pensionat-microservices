@@ -24,46 +24,34 @@ public class CustomerRestController {
     @GetMapping("/{id}")
     public ResponseEntity<CustomerDTO> getCustomer(@PathVariable Long id) {
         CustomerDTO customer = customerService.getCustomerById(id);
-        if (customer != null) {
-            return ResponseEntity.ok(customer);
-        }
-        return ResponseEntity.notFound().build();
+        return (customer != null) ? ResponseEntity.ok(customer) : ResponseEntity.notFound().build();
     }
 
     @PostMapping("/login")
     public ResponseEntity<CustomerDTO> customerExists(@RequestBody LoginRequestDTO requestDTO){
         CustomerResult result = customerService.loginRequestIsValid(requestDTO);
-        if (result.feedback() != Feedback.OK){
-            return ResponseEntity.status(getStatusFromFeedback(result.feedback(), false)).build();
-        }
-        return ResponseEntity.ok(result.dto());
+        return (result.feedback() == Feedback.OK) ? ResponseEntity.ok(result.dto()) :
+                ResponseEntity.status(getStatusFromFeedback(result.feedback(), false)).build();
     }
 
     @PostMapping("/signup")
     public ResponseEntity<CustomerDTO> registerCustomer(@RequestBody CustomerDTO customer) {
         CustomerResult result = customerService.signupRequestIsValid(customer);
-        if (result.feedback() != Feedback.OK){
-            return ResponseEntity.status(getStatusFromFeedback(result.feedback(), true)).build();
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).body(result.dto());
+        return (result.feedback() == Feedback.OK) ? ResponseEntity.status(HttpStatus.CREATED).body(result.dto()) :
+                ResponseEntity.status(getStatusFromFeedback(result.feedback(), true)).build();
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<CustomerDTO> updateCustomer(@PathVariable Long id, @RequestBody CustomerDTO customer) {
         CustomerResult updated = customerService.updateCustomer(id, customer);
-        if (updated != null) {
-            return ResponseEntity.ok(updated.dto());
-        }
-        return ResponseEntity.notFound().build();
+        return (updated != null) ? ResponseEntity.ok(updated.dto()) : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
         CustomerResult result = customerService.deleteCustomer(id);
-        if (result.feedback() != Feedback.OK){
-            return ResponseEntity.status(getStatusFromFeedback(result.feedback(), false)).build();
-        }
-        return ResponseEntity.ok().build();
+        return (result.feedback() == Feedback.OK) ? ResponseEntity.ok().build() :
+                ResponseEntity.status(getStatusFromFeedback(result.feedback(), false)).build();
     }
 
     private HttpStatus getStatusFromFeedback(Feedback feedback, boolean create) {

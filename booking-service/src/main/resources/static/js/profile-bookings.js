@@ -1,37 +1,41 @@
 import {leaveReview} from "./reviewing.js";
 
+const customerId = document.getElementById("customer-id").value;
 const completedBookingSection = document.getElementById("completed-bookings-section");
 const upcomingBookingTable = document.getElementById("upcoming-bookings-container");
 const completedBookingTable = document.getElementById("completed-bookings-container");
-const customerId = document.getElementById("customer-id").value;
-
-createBookingViewActive();
-createBookingViewCompleted();
-
-function createBookingViewActive(){
-    createBookingView(upcomingBookingTable, true);
-}
-function createBookingViewCompleted(){
-    createBookingView(completedBookingTable, false);
-}
+const deleteAccountForm = document.getElementById("delete-account-form");
+const deleteAccountButton = document.getElementById("delete-account-button");
+deleteAccountButton.addEventListener("click", (event) => {
+    showAccountDeleteConfirm(event, deleteAccountForm);
+});
+createBookingView(upcomingBookingTable, true);
+createBookingView(completedBookingTable, false);
 
 function createBookingView(table, active) {
-    const bookingType = active ? "active" : "active";
+    const bookingType = active ? "active" : "completed";
+    const tableElement = table.closest("table");
+    const tableHead = tableElement.querySelector("thead");
     table.innerHTML = "";
-    fetch(`/bookings/customer/${bookingType}/${customerId}`).then(r => r.json())
-        .then(bookings => {
-            if (bookings.length === 0) {
-                if (!active) {
-                    completedBookingSection.style.display = "none";
-                }
+    fetch(`/bookings/customer/${bookingType}/${customerId}`)
+        .then(r => r.json()).then(bookings => {
+        if (bookings.length === 0) {
+            if (!active) {
+                completedBookingSection.style.display = "none";
                 return;
             }
-            if (!active) {
-                completedBookingSection.style.display = "block";
-            }
-            bookings.forEach(booking => {table.appendChild(getBookingRow(booking, active));
-            });
-        })
+            tableHead.style.display = "none";
+            table.innerHTML = `<tr><td colspan="6" class="empty-bookings-message">You have no upcoming bookings.</td></tr>`;
+            return;
+        }
+        if (!active) {
+            completedBookingSection.style.display = "block";
+        }
+        tableHead.style.display = "";
+        bookings.forEach(booking => {
+            table.appendChild(getBookingRow(booking, active));
+        });
+    })
         .catch(error => {
             console.error(error);
             alert("Something went wrong with retrieving bookings");
@@ -41,8 +45,7 @@ function createBookingView(table, active) {
 function getBookingRow(booking, active) {
     const row = document.createElement("tr");
     row.classList.add("booking-row");
-    row.innerHTML = `
-        <td><img src="/images/rooms/room_${booking.roomid}_1.jpg" class="booking-thumbnail" alt="Room image"></td>
+    row.innerHTML = `<td><img src="/images/rooms/room_${booking.roomid}_1.jpg" class="booking-thumbnail" alt="Room image"></td>
             <td>${booking.startdate}</td>
             <td>${booking.enddate}</td>
             <td>${booking.guestcount}</td>
@@ -71,7 +74,7 @@ function showBookingDetails(booking, active) {
     modalFooter.innerHTML = `<div class="modal-actions"> ${buttons}</div>`;
     if (active) {
         document.querySelector(".edit-booking-button").onclick = () => editBooking(booking);
-        document.querySelector(".delete-booking-button").onclick = () => showDeleteConfirm(booking);
+        document.querySelector(".delete-booking-button").onclick = () => showBookingDeleteConfirm(booking);
     }
     else {
         document.querySelector(".review-booking-button").onclick = () => leaveReview(booking.roomid, customerId, modalBody, modalFooter);
@@ -83,14 +86,13 @@ function editBooking(booking){
     window.location.href = `/book?roomId=${booking.roomid}&bookingId=${booking.id}`;
 }
 
-function showDeleteConfirm(booking){
+function showBookingDeleteConfirm(booking){
     const modalElement = document.getElementById('myModal');
     const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
     const modalBody = document.getElementById('modalBody');
     const modalFooter = document.querySelector(".modal-footer");
     modalBody.innerHTML = `<p>Are you sure you want to cancel this booking?</p>`;
-    modalFooter.innerHTML = `
-        <button class="modal-btn modal-btn-danger yes">Yes</button>
+    modalFooter.innerHTML = `<button class="modal-btn modal-btn-danger yes">Yes</button>
         <button class="modal-btn modal-btn-secondary no">No</button>`;
     modalFooter.querySelector(".yes").onclick = () => deleteBooking(booking);
     modalFooter.querySelector(".no").onclick = () => modal.hide();
@@ -105,7 +107,7 @@ function deleteBooking(booking){
         }
     })
         .then(() => {
-            createBookingViewActive();
+            createBookingView(upcomingBookingTable, true);
             showFeedback("Your booking has been cancelled.");
         })
         .catch(() => {
@@ -130,8 +132,7 @@ function showAccountDeleteConfirm(event, form){
     if(modalTitle) modalTitle.innerHTML = "Delete Account";
     document.getElementById('modalBody').innerHTML = `
         <p style="color: #5a514d; font-size: 1.1rem; text-align: center; margin-top: 15px;">
-            Are you absolutely sure you want to delete your account? This action cannot be undone.
-        </p>`;
+            Are you absolutely sure you want to delete your account? This action cannot be undone.</p>`;
     document.querySelector(".modal-footer").innerHTML = `
         <button class="modal-btn modal-btn-danger yes text-center" style="width: 100%; margin-bottom: 8px;">Yes, Delete My Account</button>
         <button class="modal-btn modal-btn-secondary no w-100">Cancel</button>`;

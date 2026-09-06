@@ -15,8 +15,6 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class CustomerService {
     private final RestTemplate restTemplate;
-    //    private final String API_URL = "http://localhost:8081/api/customers";
-//private final String API_URL = "http://customer-service:8081/api/customers";
     @Value("${customer.service.url}")
     private String customerServiceUrl;
 
@@ -38,27 +36,8 @@ public class CustomerService {
     }
 
     public CustomerResponseDTO signupCustomer(CustomerDTO dto) {
-        System.out.println("signupCustomer is called");
-        if (dto != null){
-            System.out.println("dto != null");
-            if (dto.getEmail() != null && dto.getEmail().isBlank()){
-                System.out.println("email is: " + dto.getEmail());
-            }
-            else {
-                System.out.println("email is null");
-            }
-        }
-        else {
-            System.out.println("dto is null");
-        }
         try {
             CustomerDTO response = restTemplate.postForObject(customerServiceUrl + "/signup", dto, CustomerDTO.class);
-            if (response != null){
-                System.out.println("response != null");
-            }
-            else {
-                System.out.println("response is null");
-            }
             return (response != null) ? new CustomerResponseDTO(response, Feedback.OK) :
                     new CustomerResponseDTO(Feedback.CUSTOMER_SERVICE_UNAVAILABLE);
         } catch (ResourceAccessException e) {
@@ -107,7 +86,6 @@ public class CustomerService {
             case 401 -> Feedback.UNAUTHORIZED;
             case 404 -> Feedback.INVALID_EMAIL;
             case 409 -> Feedback.USER_EXISTS;
-//            case 503 -> Feedback.CUSTOMER_SERVICE_UNAVAILABLE;
             default -> Feedback.CUSTOMER_SERVICE_UNAVAILABLE;
         };
     }
@@ -117,9 +95,7 @@ public class CustomerService {
             case 400 -> Feedback.EMPTY_EMAIL;
             case 401 -> Feedback.INVALID_PASSWORD;
             case 404 -> Feedback.INVALID_EMAIL;
-//            case 503 -> Feedback.CUSTOMER_SERVICE_UNAVAILABLE;
             default -> Feedback.CUSTOMER_SERVICE_UNAVAILABLE;
         };
     }
 }
-

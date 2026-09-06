@@ -97,7 +97,9 @@ function applyBookingInfo(booking) {
     calendar.setDate([start, end]);
     bookingState.selectedDates = [start, end];
     document.getElementById("booking-dates").textContent = `${booking.startdate} → ${booking.enddate}`;
-    guestcount.value = booking.guestcount;
+    if (booking.guestcount != null) {
+        guestcount.value = booking.guestcount;
+    }
     if (extraBedOption) {
         extraBedOption.checked = booking.extrabed;
     }
@@ -110,9 +112,7 @@ function applyBookingInfo(booking) {
 function showGuestSection() {
     const guestSection = document.getElementById('guest-section');
     guestSection.style.display = "block";
-    let options = `
-        <option value="1">1</option>
-        <option value="2">2</option>`;
+    let options = `<option value="1">1</option> <option value="2">2</option>`;
     if (extraBedOption) {
         options += `<option value="3">3</option>`;
     }
@@ -155,6 +155,11 @@ function updateTotalPrice(selectedDates) {
 }
 
 function handleBookingClick() {
+    const guestCount = Number(guestcount.value);
+    if (guestCount < 1) {
+        showErrorModal("Please select at least one guest.", document.getElementById("room-id").value);
+        return;
+    }
     const formatDate = (d) => {
         const year = d.getFullYear();
         const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -174,9 +179,6 @@ function handleBookingClick() {
     fetch(url, {method: method, headers: {"Content-Type": "application/json"}, body: JSON.stringify(bookingRequest)})
         .then(response => {
             if (!response.ok) {
-
-
-                console.log("STATUS:", response.status);
                 throw new Error("Booking failed with status " + response.status);
             }
             return response.json();})
@@ -193,7 +195,7 @@ function showErrorModal(message, roomId) {
     const modalTitle = document.querySelector(".modal-title");
     const modalBody = document.getElementById('modalBody');
     const modalFooter = document.querySelector(".modal-footer");
-    modalTitle.innerHTML = "Authentication Required";
+    modalTitle.innerHTML = `${message}`;
     modalBody.innerHTML = `<p style="color: #5a514d; font-size: 1.1rem; text-align: center; margin-top: 15px;">${message}</p>`;
     modalFooter.innerHTML = `
         <a href="/customer?returnToBook=true&roomId=${roomId}" class="modal-btn modal-btn-primary text-decoration-none text-center" style="width: 100%; margin-bottom: 8px;">Log In / Sign Up</a>
@@ -208,8 +210,7 @@ function showConfirmationModal(data) {
     const modalElement = document.getElementById('myModal');
     const modal = new bootstrap.Modal(modalElement);
     const modalBody = document.getElementById('modalBody');
-    modalBody.innerHTML = `
-        <img src="/images/rooms/room_${data.roomid}_1.jpg" class="booking-thumbnail" alt="Room image">
+    modalBody.innerHTML = ` <img src="/images/rooms/room_${data.roomid}_1.jpg" class="booking-thumbnail" alt="Room image">
         <h5>Room ${data.roomid}</h5>
         <p><strong>Dates:</strong><br> ${data.startdate} → ${data.enddate}</p>
         <p><strong>Guests:</strong>${data.guestcount}</p>${data.extrabed ? `
@@ -218,14 +219,8 @@ function showConfirmationModal(data) {
     const modalTitle = document.querySelector(".modal-title");
     modalTitle.innerHTML = editMode ? "Your booking has been updated" : "Booking confirmed"
     const modalFooter = document.querySelector(".modal-footer");
-    modalFooter.innerHTML = `
-    <button class="modal-btn modal-btn-primary" data-bs-dismiss="modal"> Close</button>`;
+    modalFooter.innerHTML = `<button class="modal-btn modal-btn-primary" data-bs-dismiss="modal"> Close</button>`;
     const reroute = editMode ? "/profile" : "/home";
-    modalElement.addEventListener("hidden.bs.modal", () => {
-            window.location.href = reroute;
-        },
-        {
-            once: true
-        });
+    modalElement.addEventListener("hidden.bs.modal", () => {window.location.href = reroute;}, {once: true});
     modal.show();
 }

@@ -28,8 +28,8 @@ public class FrontendController {
 
     @GetMapping("/home")
     public String showHomePage(Model model,
-            @RequestParam(required = false) LocalDate startdate,
-            @RequestParam(required = false) LocalDate enddate) {
+                               @RequestParam(required = false) LocalDate startdate,
+                               @RequestParam(required = false) LocalDate enddate) {
         if (startdate != null && enddate != null) {
             List<Room> availableRooms = roomService.findAvailableRooms(startdate, enddate);
             model.addAttribute("rooms", availableRooms);
@@ -40,8 +40,7 @@ public class FrontendController {
     }
 
     @GetMapping("/room")
-    public String showRoomPage(@RequestParam Long id,
-                               @RequestParam(required = false) String startdate,
+    public String showRoomPage(@RequestParam Long id, @RequestParam(required = false) String startdate,
                                @RequestParam(required = false) String enddate, Model model) {
         model.addAttribute("room", roomService.getRoomById(id));
         model.addAttribute("startdate", startdate);
@@ -56,10 +55,9 @@ public class FrontendController {
 
     @GetMapping("/book")
     public String showBookingPage(@RequestParam Long roomId,
-            @RequestParam(required = false) Long bookingId,
-            @RequestParam(required = false) LocalDate startdate,
-            @RequestParam(required = false) LocalDate enddate,
-            Model model) {
+                                  @RequestParam(required = false) Long bookingId,
+                                  @RequestParam(required = false) LocalDate startdate,
+                                  @RequestParam(required = false) LocalDate enddate, Model model) {
         Room room = roomService.getRoomById(roomId);
         model.addAttribute("room", room);
         model.addAttribute("bookingId", bookingId);
@@ -77,11 +75,8 @@ public class FrontendController {
 
     @PostMapping("/login")
     public String login(@ModelAttribute("loginCustomer") CustomerDTO customer, HttpSession session, Model model,
-                        @RequestParam(required = false) Boolean returnToBook,
-                        @RequestParam(required = false) Long roomId) {
+                        @RequestParam(required = false) Boolean returnToBook, @RequestParam(required = false) Long roomId) {
         CustomerResponseDTO responseDTO = customerService.loginCustomer(customer.getEmail(), customer.getPassword());
-        System.out.println("Feedback: " + responseDTO.getFeedback());
-        System.out.println("CustomerDTO: " + responseDTO.getCustomerDTO());
         if (responseDTO.getFeedback() == Feedback.OK) {
             session.setAttribute("loginCustomerId", responseDTO.getCustomerDTO().getId());
             if (Boolean.TRUE.equals(returnToBook) && roomId != null) {
@@ -97,8 +92,7 @@ public class FrontendController {
 
     @PostMapping("/signup")
     public String signup(@ModelAttribute("signupCustomer") CustomerDTO customer, HttpSession session, Model model,
-                         @RequestParam(required = false) Boolean returnToBook,
-                         @RequestParam(required = false) Long roomId) {
+                         @RequestParam(required = false) Boolean returnToBook, @RequestParam(required = false) Long roomId) {
         CustomerResponseDTO responseDTO = customerService.signupCustomer(customer);
         if (responseDTO.getFeedback() == Feedback.OK) {
             session.setAttribute("loginCustomerId", responseDTO.getCustomerDTO().getId());
