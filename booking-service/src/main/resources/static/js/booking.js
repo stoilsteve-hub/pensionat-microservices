@@ -21,7 +21,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 async function getBookingData() {
     const storedBooking = sessionStorage.getItem("ongoingBooking");
-    console.log("storedBooking:", storedBooking);
     if (storedBooking != null) {
         sessionStorage.removeItem("ongoingBooking");
         return JSON.parse(storedBooking);
@@ -29,9 +28,6 @@ async function getBookingData() {
     if (!bookingId) {
         const prefillStart = document.getElementById("prefill-startdate")?.value;
         const prefillEnd = document.getElementById("prefill-enddate")?.value;
-
-        console.log("prefillStart:", prefillStart);
-        console.log("prefillEnd:", prefillEnd);
         if (prefillStart && prefillEnd) {
             return {
                 startdate: prefillStart,
@@ -40,7 +36,6 @@ async function getBookingData() {
         }
         return null;
     }
-
     editMode = true;
     const response = await fetch(`/bookings/${bookingId}`);
     if (!response.ok) {
@@ -117,9 +112,7 @@ function applyBookingInfo(booking) {
 function showGuestSection() {
     const guestSection = document.getElementById('guest-section');
     guestSection.style.display = "block";
-    let options = `
-        <option value="1">1</option>
-        <option value="2">2</option>`;
+    let options = `<option value="1">1</option> <option value="2">2</option>`;
     if (extraBedOption) {
         options += `<option value="3">3</option>`;
     }
@@ -186,9 +179,6 @@ function handleBookingClick() {
     fetch(url, {method: method, headers: {"Content-Type": "application/json"}, body: JSON.stringify(bookingRequest)})
         .then(response => {
             if (!response.ok) {
-
-
-                console.log("STATUS:", response.status);
                 throw new Error("Booking failed with status " + response.status);
             }
             return response.json();})
@@ -220,8 +210,7 @@ function showConfirmationModal(data) {
     const modalElement = document.getElementById('myModal');
     const modal = new bootstrap.Modal(modalElement);
     const modalBody = document.getElementById('modalBody');
-    modalBody.innerHTML = `
-        <img src="/images/rooms/room_${data.roomid}_1.jpg" class="booking-thumbnail" alt="Room image">
+    modalBody.innerHTML = ` <img src="/images/rooms/room_${data.roomid}_1.jpg" class="booking-thumbnail" alt="Room image">
         <h5>Room ${data.roomid}</h5>
         <p><strong>Dates:</strong><br> ${data.startdate} → ${data.enddate}</p>
         <p><strong>Guests:</strong>${data.guestcount}</p>${data.extrabed ? `
@@ -230,14 +219,8 @@ function showConfirmationModal(data) {
     const modalTitle = document.querySelector(".modal-title");
     modalTitle.innerHTML = editMode ? "Your booking has been updated" : "Booking confirmed"
     const modalFooter = document.querySelector(".modal-footer");
-    modalFooter.innerHTML = `
-    <button class="modal-btn modal-btn-primary" data-bs-dismiss="modal"> Close</button>`;
+    modalFooter.innerHTML = `<button class="modal-btn modal-btn-primary" data-bs-dismiss="modal"> Close</button>`;
     const reroute = editMode ? "/profile" : "/home";
-    modalElement.addEventListener("hidden.bs.modal", () => {
-            window.location.href = reroute;
-        },
-        {
-            once: true
-        });
+    modalElement.addEventListener("hidden.bs.modal", () => {window.location.href = reroute;}, {once: true});
     modal.show();
 }

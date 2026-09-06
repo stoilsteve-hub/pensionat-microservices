@@ -66,11 +66,9 @@ public class BookingService {
 
     public BookingResult createBooking(BookingDTO req, Long customerId) {
         if (!checkDateValidity(req.getStartdate(), req.getEnddate())) {
-            System.out.println("invalid dates");
             return toResult(null, BookingResultStatus.INVALID_DATES);
         }
         if (!checkRoomAvailability(req.getRoomid(), req.getStartdate(), req.getEnddate(), null)) {
-            System.out.println("room unavailable");
             return toResult(null, BookingResultStatus.ROOM_UNAVAILABLE);
         }
         Booking booking = new Booking();
@@ -83,7 +81,6 @@ public class BookingService {
         booking.setCustomerid(customerId);
         booking.setStatus(Booking.BookingStatus.ACTIVE);
         booking.setSubmitdate(LocalDateTime.now());
-        System.out.println("created booking.");
         return toResult(bookingRepo.save(booking), BookingResultStatus.OK);
     }
 

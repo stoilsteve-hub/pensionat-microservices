@@ -7,10 +7,8 @@
         <div class="row g-4">
             <div class="col-12 col-md-3" th:each="room : ${rooms}">
                 <a th:href="@{/room(id=${room.id},startdate=${param.startdate},enddate=${param.enddate})}" class="text-decoration-none d-block text-center" style="transition: transform 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-                    <img th:src="@{'/images/rooms/room_' + ${room.id} + '_1.jpg'}"
-                         class="w-100 mb-3"
-                         alt="Hotel Room"
-                         style="height: 240px; object-fit: cover; border-radius: 8px;">
+                    <img th:src="@{'/images/rooms/room_' + ${room.id} + '_1.jpg'}" class="w-100 mb-3"
+                         alt="Hotel Room" style="height: 240px; object-fit: cover; border-radius: 8px;">
                     <p class="mb-1" style="letter-spacing: 0.15em; text-transform: uppercase; font-size: 0.75rem; color: #a67b6b;" th:text="${room.roomType}"></p>
                     <h2 class="mb-0" style="letter-spacing: 0.15em; text-transform: uppercase; font-size: 1.1rem; color: #5f4b45;" th:text="'Room ' + ${room.roomNumber}"></h2>
                 </a>

@@ -45,8 +45,7 @@ function createBookingView(table, active) {
 function getBookingRow(booking, active) {
     const row = document.createElement("tr");
     row.classList.add("booking-row");
-    row.innerHTML = `
-        <td><img src="/images/rooms/room_${booking.roomid}_1.jpg" class="booking-thumbnail" alt="Room image"></td>
+    row.innerHTML = `<td><img src="/images/rooms/room_${booking.roomid}_1.jpg" class="booking-thumbnail" alt="Room image"></td>
             <td>${booking.startdate}</td>
             <td>${booking.enddate}</td>
             <td>${booking.guestcount}</td>
@@ -93,8 +92,7 @@ function showBookingDeleteConfirm(booking){
     const modalBody = document.getElementById('modalBody');
     const modalFooter = document.querySelector(".modal-footer");
     modalBody.innerHTML = `<p>Are you sure you want to cancel this booking?</p>`;
-    modalFooter.innerHTML = `
-        <button class="modal-btn modal-btn-danger yes">Yes</button>
+    modalFooter.innerHTML = `<button class="modal-btn modal-btn-danger yes">Yes</button>
         <button class="modal-btn modal-btn-secondary no">No</button>`;
     modalFooter.querySelector(".yes").onclick = () => deleteBooking(booking);
     modalFooter.querySelector(".no").onclick = () => modal.hide();
@@ -134,8 +132,7 @@ function showAccountDeleteConfirm(event, form){
     if(modalTitle) modalTitle.innerHTML = "Delete Account";
     document.getElementById('modalBody').innerHTML = `
         <p style="color: #5a514d; font-size: 1.1rem; text-align: center; margin-top: 15px;">
-            Are you absolutely sure you want to delete your account? This action cannot be undone.
-        </p>`;
+            Are you absolutely sure you want to delete your account? This action cannot be undone.</p>`;
     document.querySelector(".modal-footer").innerHTML = `
         <button class="modal-btn modal-btn-danger yes text-center" style="width: 100%; margin-bottom: 8px;">Yes, Delete My Account</button>
         <button class="modal-btn modal-btn-secondary no w-100">Cancel</button>`;

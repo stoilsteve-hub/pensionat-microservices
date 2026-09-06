@@ -8,19 +8,13 @@
         <div class="col-12 col-md-8">
             <div class="booking-card text-center">
                 <h2 class="mb-4" style="font-family: 'Playfair Display', serif; color: #5f4b45;">Customer Profile</h2>
-                <div th:if="${deleteError}"
-                     class="alert alert-danger text-center"
-                     role="alert">
+                <div th:if="${deleteError}" class="alert alert-danger text-center" role="alert">
                     <p th:text="${deleteError}" class="m-0"></p>
                 </div>
-                <div th:if="${successMessage}"
-                     class="alert alert-success text-center"
-                     role="alert">
+                <div th:if="${successMessage}" class="alert alert-success text-center" role="alert">
                     <p th:text="${successMessage}" class="m-0"></p>
                 </div>
-                <div th:if="${error}"
-                     class="alert alert-danger text-center"
-                     role="alert">
+                <div th:if="${error}" class="alert alert-danger text-center" role="alert">
                     <p th:text="${error}" class="m-0"></p>
                 </div>
                 <input type="hidden" id="customer-id" th:value="${customer.id}">

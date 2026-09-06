@@ -29,8 +29,7 @@ function createModalContents(modalBody, reviewCollection){
     const reviews = reviewCollection.reviews;
     const totalReviews = reviewCollection.totalReviews;
     const capInfo = totalReviews > reviews.length ? "Showing the latest 10 reviews" : "";
-    modalBody.innerHTML = `
-    <h2 class="reviews-title">Reviews for room ${roomNumber}</h2>
+    modalBody.innerHTML = `<h2 class="reviews-title">Reviews for room ${roomNumber}</h2>
         <div class="average-rating">${createStars(average)}<span>${average.toFixed(1)}/5</span></div>
         <p class="review-count">Based on ${totalReviews} reviews</p>
         <p>${capInfo}</p>
@@ -42,8 +41,7 @@ function createModalContents(modalBody, reviewCollection){
 function getReviewCard(review){
     const card = document.createElement("div");
     card.classList.add("review-card");
-    card.innerHTML = `
-        <div class="review-rating">${createStars(review.stars)}</div>
+    card.innerHTML = `<div class="review-rating">${createStars(review.stars)}</div>
         <p class="review-comment"></p>
         <div class="review-details">
             <div> <span class="review-label">Stayed: </span>${review.startdate} - ${review.enddate}</div>
@@ -56,8 +54,7 @@ function getReviewCard(review){
 function createStars(number) {
     let stars = "";
     for (let i = 1; i <= 5; i++) {
-        stars += (i <= number) ? `<i class="fa-solid fa-star filled-star"></i>`
-            : `<i class="fa-regular fa-star empty-star"></i>`;
+        stars += (i <= number) ? `<i class="fa-solid fa-star filled-star"></i>` : `<i class="fa-regular fa-star empty-star"></i>`;
     }
     return stars;
 }

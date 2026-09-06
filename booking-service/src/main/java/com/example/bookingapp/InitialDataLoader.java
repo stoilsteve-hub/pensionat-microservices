@@ -1,14 +1,10 @@
 package com.example.bookingapp;
 
-import com.example.bookingapp.model.Booking;
-import com.example.bookingapp.model.Room;
-import com.example.bookingapp.repository.BookingRepository;
-import com.example.bookingapp.repository.RoomRepository;
+import com.example.bookingapp.model.*;
+import com.example.bookingapp.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 
 @Component
 public class InitialDataLoader implements CommandLineRunner {
