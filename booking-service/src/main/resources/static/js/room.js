@@ -46,7 +46,7 @@ function getReviewCard(review){
         <div class="review-rating">${createStars(review.stars)}</div>
         <p class="review-comment"></p>
         <div class="review-details">
-            <div> <span class="review-label">Stayed:</span>${review.startdate} - ${review.enddate}</div>
+            <div> <span class="review-label">Stayed: </span>${review.startdate} - ${review.enddate}</div>
             <div><span class="review-label">Submitted by: </span>${review.customer} on ${review.submitdate}</div>
         </div>`;
     card.querySelector(".review-comment").textContent = review.comments;

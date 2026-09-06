@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 async function getBookingData() {
     const storedBooking = sessionStorage.getItem("ongoingBooking");
+    console.log("storedBooking:", storedBooking);
     if (storedBooking != null) {
         sessionStorage.removeItem("ongoingBooking");
         return JSON.parse(storedBooking);
@@ -28,6 +29,9 @@ async function getBookingData() {
     if (!bookingId) {
         const prefillStart = document.getElementById("prefill-startdate")?.value;
         const prefillEnd = document.getElementById("prefill-enddate")?.value;
+
+        console.log("prefillStart:", prefillStart);
+        console.log("prefillEnd:", prefillEnd);
         if (prefillStart && prefillEnd) {
             return {
                 startdate: prefillStart,
@@ -36,6 +40,7 @@ async function getBookingData() {
         }
         return null;
     }
+
     editMode = true;
     const response = await fetch(`/bookings/${bookingId}`);
     if (!response.ok) {
@@ -97,7 +102,9 @@ function applyBookingInfo(booking) {
     calendar.setDate([start, end]);
     bookingState.selectedDates = [start, end];
     document.getElementById("booking-dates").textContent = `${booking.startdate} → ${booking.enddate}`;
-    guestcount.value = booking.guestcount;
+    if (booking.guestcount != null) {
+        guestcount.value = booking.guestcount;
+    }
     if (extraBedOption) {
         extraBedOption.checked = booking.extrabed;
     }
@@ -155,6 +162,11 @@ function updateTotalPrice(selectedDates) {
 }
 
 function handleBookingClick() {
+    const guestCount = Number(guestcount.value);
+    if (guestCount < 1) {
+        showErrorModal("Please select at least one guest.", document.getElementById("room-id").value);
+        return;
+    }
     const formatDate = (d) => {
         const year = d.getFullYear();
         const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -193,7 +205,7 @@ function showErrorModal(message, roomId) {
     const modalTitle = document.querySelector(".modal-title");
     const modalBody = document.getElementById('modalBody');
     const modalFooter = document.querySelector(".modal-footer");
-    modalTitle.innerHTML = "Authentication Required";
+    modalTitle.innerHTML = `${message}`;
     modalBody.innerHTML = `<p style="color: #5a514d; font-size: 1.1rem; text-align: center; margin-top: 15px;">${message}</p>`;
     modalFooter.innerHTML = `
         <a href="/customer?returnToBook=true&roomId=${roomId}" class="modal-btn modal-btn-primary text-decoration-none text-center" style="width: 100%; margin-bottom: 8px;">Log In / Sign Up</a>

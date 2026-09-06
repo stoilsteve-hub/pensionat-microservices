@@ -66,9 +66,11 @@ public class BookingService {
 
     public BookingResult createBooking(BookingDTO req, Long customerId) {
         if (!checkDateValidity(req.getStartdate(), req.getEnddate())) {
+            System.out.println("invalid dates");
             return toResult(null, BookingResultStatus.INVALID_DATES);
         }
         if (!checkRoomAvailability(req.getRoomid(), req.getStartdate(), req.getEnddate(), null)) {
+            System.out.println("room unavailable");
             return toResult(null, BookingResultStatus.ROOM_UNAVAILABLE);
         }
         Booking booking = new Booking();
@@ -81,6 +83,7 @@ public class BookingService {
         booking.setCustomerid(customerId);
         booking.setStatus(Booking.BookingStatus.ACTIVE);
         booking.setSubmitdate(LocalDateTime.now());
+        System.out.println("created booking.");
         return toResult(bookingRepo.save(booking), BookingResultStatus.OK);
     }
 
@@ -98,8 +101,7 @@ public class BookingService {
     }
 
     public List<BookingDTO> getCompletedBookingsByCustomerId(Long customerId) {
-        return toDTOList((bookingRepo.findByCustomeridAndStatus(customerId, Booking.BookingStatus.COMPLETED)
-                .stream().filter(b -> !b.getEnddate().isBefore(LocalDate.now())).toList()));
+        return toDTOList(bookingRepo.findByCustomeridAndStatus(customerId, Booking.BookingStatus.COMPLETED));
     }
 
     public List<BookingDTO> getActiveBookingsByCustomerId(long customerId) {
@@ -110,11 +112,8 @@ public class BookingService {
     public boolean checkRoomAvailability(Long roomId, LocalDate startDate, LocalDate endDate, Long bookingId) {
         List<Booking> activeBookings = retrieveActiveBookingsByRoomId(roomId);
         for (Booking b : activeBookings) {
-            boolean dateTaken = (startDate.isBefore(b.getEnddate()) && endDate.isAfter(b.getStartdate()));
-            if (bookingId == null) {
-                return dateTaken;
-            }
-            if (dateTaken && !b.getId().equals(bookingId)) {
+            boolean dateTaken = startDate.isBefore(b.getEnddate()) && endDate.isAfter(b.getStartdate());
+            if (dateTaken && (bookingId == null || !b.getId().equals(bookingId))) {
                 return false;
             }
         }

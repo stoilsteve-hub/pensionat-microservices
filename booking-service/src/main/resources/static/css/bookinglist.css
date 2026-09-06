@@ -143,3 +143,10 @@
         height: 44px;
     }
 }
+
+.empty-bookings-message {
+    text-align: center;
+    padding: 30px;
+    color: #7a6a63;
+    font-style: italic;
+}
