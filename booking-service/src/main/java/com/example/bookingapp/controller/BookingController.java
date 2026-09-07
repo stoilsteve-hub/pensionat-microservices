@@ -47,6 +47,13 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.getBookingsByCustomerId(customerid));
     }
 
+    @GetMapping("/customer/review")
+    public ResponseEntity<ReviewBookingDTO> getReviewBooking(@RequestParam Long customerId, @RequestParam Long roomId,
+                                                             @RequestParam LocalDate startDate, @RequestParam LocalDate endDate){
+        ReviewBookingDTO reviewBooking = bookingService.getReviewBookingByCustomerIdAndTimePeriod(customerId, roomId, startDate, endDate);
+        return (reviewBooking != null) ? ResponseEntity.ok(reviewBooking) : ResponseEntity.notFound().build();
+    }
+
     @GetMapping("/customer/active/{customerid}")
     public ResponseEntity<?> getUpcomingBookingsByCustomerId(@PathVariable Long customerid, Authentication auth) {
         Long loggedInCustomerId = (Long) auth.getPrincipal();

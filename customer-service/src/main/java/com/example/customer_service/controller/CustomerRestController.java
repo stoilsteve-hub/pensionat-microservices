@@ -31,6 +31,12 @@ public class CustomerRestController {
         return (customer != null) ? ResponseEntity.ok(customer) : ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/review/{id}")
+    public ResponseEntity<ReviewCustomerDTO> getReviewCustomer(@PathVariable Long id) {
+        ReviewCustomerDTO customer = customerService.getReviewCustomerById(id);
+        return (customer != null) ? ResponseEntity.ok(customer) : ResponseEntity.notFound().build();
+    }
+
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> customerExists(@RequestBody LoginRequestDTO requestDTO){
         CustomerResult result = customerService.loginRequestIsValid(requestDTO);

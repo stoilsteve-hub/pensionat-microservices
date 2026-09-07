@@ -50,9 +50,9 @@ public class InitialDataLoader implements CommandLineRunner {
                 }
             }
         }
-        if (!bookingRepo.existsByCustomeridAndStatus(7L, Booking.BookingStatus.COMPLETED)) {
+        if (!bookingRepo.existsByCustomeridAndStatus(1L, Booking.BookingStatus.COMPLETED)) {
             Booking b1 = new Booking();
-            b1.setCustomerid(7L);
+            b1.setCustomerid(1L);
             b1.setRoomid(1L);
             b1.setGuestcount(1);
             b1.setExtrabed(false);
@@ -64,7 +64,7 @@ public class InitialDataLoader implements CommandLineRunner {
             bookingRepo.save(b1);
 
             Booking b2 = new Booking();
-            b2.setCustomerid(7L);
+            b2.setCustomerid(1L);
             b2.setRoomid(6L);
             b2.setGuestcount(3);
             b2.setExtrabed(true);

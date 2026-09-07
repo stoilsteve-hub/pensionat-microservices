@@ -14,6 +14,8 @@ public class Review {
     private Long id;
     private Long roomId;
     private Long customerId;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private int rating;
     private String comment;
     private LocalDate submitDate;

@@ -19,6 +19,7 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain chain(HttpSecurity http) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)
+                .logout(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(a -> a
                         .requestMatchers(
                                 "/",
@@ -28,6 +29,7 @@ public class SecurityConfig {
                                 "/search",
                                 "/book",
                                 "/customer",
+                                "/customer/review/**",
                                 "/profile",
                                 "/profile/**",
                                 "/login",

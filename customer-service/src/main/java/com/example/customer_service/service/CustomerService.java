@@ -42,6 +42,11 @@ public class CustomerService {
         return customer != null ? toDTO(customer) : null;
     }
 
+    public ReviewCustomerDTO getReviewCustomerById(Long id) {
+        Customer customer = customerRepo.findById(id).orElse(null);
+        return customer != null ? new ReviewCustomerDTO(customer.getName()) : null;
+    }
+
     public List<CustomerDTO> getAllCustomers() {
         return toDTOList(customerRepo.findAll());
     }

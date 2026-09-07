@@ -1,9 +1,10 @@
 let selectedRating = 0;
 let submitButton = null;
 
-export function leaveReview(roomId, customerId, modalBody, modalFooter) {
+export function leaveReview(booking, modalBody, modalFooter) {
     selectedRating = 0;
     submitButton = null;
+    const customerId = document.getElementById("customer-id").value;
     modalBody.innerHTML = getReviewModalBody();
     modalFooter.innerHTML = `<button type="button" class="review-submit-button" disabled>Leave review </button>`;
     const stars = modalBody.querySelectorAll(".star");
@@ -19,8 +20,10 @@ export function leaveReview(roomId, customerId, modalBody, modalFooter) {
     commentSection.addEventListener("input", () => {updateSubmitButton();});
     submitButton.addEventListener("click", async () => {
         const review = {
-            roomId: roomId,
+            roomId: booking.roomid,
             customerId: customerId,
+            startDate: booking.startdate,
+            endDate: booking.enddate,
             rating: selectedRating,
             comment: commentSection.value
         };

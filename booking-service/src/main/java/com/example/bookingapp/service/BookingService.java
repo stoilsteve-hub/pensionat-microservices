@@ -36,6 +36,12 @@ public class BookingService {
         return bookingList != null ? toDTOList(bookingList) : Collections.emptyList();
     }
 
+
+    public ReviewBookingDTO getReviewBookingByCustomerIdAndTimePeriod(Long customerId, Long roomId, LocalDate startdate, LocalDate enddate) {
+        Booking booking = bookingRepo.findByCustomeridAndRoomidAndStartdateAndEnddateAndStatus(customerId, roomId, startdate, enddate, Booking.BookingStatus.COMPLETED);
+        return booking != null ? new ReviewBookingDTO(startdate, enddate) : null;
+    }
+
     public boolean hasActiveBooking(Long customerId) {
         return bookingRepo.existsByCustomeridAndStatus(customerId, Booking.BookingStatus.ACTIVE);
     }
