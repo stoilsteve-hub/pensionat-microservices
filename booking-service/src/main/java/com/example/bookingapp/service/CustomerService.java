@@ -13,9 +13,6 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class CustomerService {
     private final RestTemplate restTemplate;
-    private final HttpSession session;
-    //    private final String API_URL = "http://localhost:8081/api/customers";
-//private final String API_URL = "http://customer-service:8081/api/customers";
     @Value("${customer.service.url}")
     private String customerServiceUrl;
 
@@ -146,7 +143,6 @@ public class CustomerService {
             case 401 -> Feedback.UNAUTHORIZED;
             case 404 -> Feedback.INVALID_EMAIL;
             case 409 -> Feedback.USER_EXISTS;
-//            case 503 -> Feedback.CUSTOMER_SERVICE_UNAVAILABLE;
             default -> Feedback.CUSTOMER_SERVICE_UNAVAILABLE;
         };
     }
@@ -156,9 +152,7 @@ public class CustomerService {
             case 400 -> Feedback.EMPTY_EMAIL;
             case 401 -> Feedback.INVALID_PASSWORD;
             case 404 -> Feedback.INVALID_EMAIL;
-//            case 503 -> Feedback.CUSTOMER_SERVICE_UNAVAILABLE;
             default -> Feedback.CUSTOMER_SERVICE_UNAVAILABLE;
         };
     }
 }
-

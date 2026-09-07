@@ -13,20 +13,18 @@ import java.util.*;
 
 @Service
 public class CustomerService {
-    private final CustomerRepository customerRepository;
+    private final CustomerRepository customerRepo;
     private final RestTemplate restTemplate;
     private final PasswordEncoder passwordEncoder;
 
-    public CustomerService(RestTemplateConfig restTemplateConfig, CustomerRepository customerRepository, PasswordEncoder passwordEncoder) {
-        this.customerRepository = customerRepository;
+    public CustomerService(RestTemplateConfig restTemplateConfig, CustomerRepository customerRepo, PasswordEncoder passwordEncoder) {
+        this.customerRepo = customerRepo;
         this.passwordEncoder = passwordEncoder;
         this.restTemplate = restTemplateConfig.restTemplate();
     }
 
     public CustomerResult loginRequestIsValid(LoginRequestDTO requestDTO) {
-        CustomerResult result = loginCustomer(requestDTO.getEmail(), requestDTO.getPassword());
-        System.out.println("result in loginRequestIsValid: " + result.feedback());
-        return result;
+        return loginCustomer(requestDTO.getEmail(), requestDTO.getPassword());
     }
 
     public CustomerResult signupRequestIsValid(CustomerDTO dto) {
@@ -40,12 +38,12 @@ public class CustomerService {
     }
 
     public CustomerDTO getCustomerById(Long id) {
-        Customer customer = customerRepository.findById(id).orElse(null);
+        Customer customer = customerRepo.findById(id).orElse(null);
         return customer != null ? toDTO(customer) : null;
     }
 
     public List<CustomerDTO> getAllCustomers() {
-        return toDTOList(customerRepository.findAll());
+        return toDTOList(customerRepo.findAll());
     }
 
     public CustomerDTO toDTO(Customer c) {
@@ -61,27 +59,24 @@ public class CustomerService {
     }
 
     public CustomerResult createCustomer(CustomerDTO dto) {
-        Optional<Customer> existingCustomer = customerRepository.findByEmail(dto.getEmail());
+        Optional<Customer> existingCustomer = customerRepo.findByEmail(dto.getEmail());
         if (existingCustomer.isPresent()) {
             return new CustomerResult(null, Feedback.USER_EXISTS);
         }
-
-        Customer newCustomer = (customerRepository.save(new Customer(dto.getName(), dto.getEmail(), dto.getAddress(),
+        Customer newCustomer = (customerRepo.save(new Customer(dto.getName(), dto.getEmail(), dto.getAddress(),
                 dto.getPhone(), passwordEncoder.encode(dto.getPassword()))));
         return new CustomerResult(toDTO(newCustomer), Feedback.OK);
     }
 
     public CustomerResult updateCustomer(Long id, CustomerDTO customer) {
-        Customer existing = customerRepository.findById(id).orElse(null);
+        Customer existing = customerRepo.findById(id).orElse(null);
         if (existing == null) {
             return new CustomerResult(null, Feedback.INVALID_USER);
         }
-        Optional<Customer> emailOwner = customerRepository.findByEmail(customer.getEmail());
-        if (emailOwner.isPresent() && emailOwner.get().getId() != id) {
-//            throw new EmailExistsException("Email already exists");
+        Optional<Customer> emailOwner = customerRepo.findByEmail(customer.getEmail());
+        if (emailOwner.isPresent() && !emailOwner.get().getId().equals(id)) {
             return new CustomerResult(null, Feedback.USER_EXISTS);
         }
-
         existing.setName(customer.getName());
         existing.setEmail(customer.getEmail());
         existing.setAddress(customer.getAddress());
@@ -89,8 +84,7 @@ public class CustomerService {
         if (customer.getPassword() != null && !customer.getPassword().isBlank()) {
             existing.setPassword(passwordEncoder.encode(customer.getPassword()));
         }
-
-        return new CustomerResult(toDTO(customerRepository.save(existing)), Feedback.OK);
+        return new CustomerResult(toDTO(customerRepo.save(existing)), Feedback.OK);
     }
 
     public CustomerResult deleteCustomer(Long customerId) {
@@ -101,9 +95,9 @@ public class CustomerService {
         if (Boolean.TRUE.equals(response.getBody())) {
             return new CustomerResult(null, Feedback.HAS_ACTIVE_BOOKINGS);
         }
-        Customer customer = customerRepository.findById(customerId).orElse(null);
+        Customer customer = customerRepo.findById(customerId).orElse(null);
         if (customer != null) {
-            customerRepository.deleteById(customerId);
+            customerRepo.deleteById(customerId);
             return new CustomerResult(null, Feedback.OK);
         }
         return new CustomerResult(null, Feedback.INVALID_USER);
@@ -128,16 +122,10 @@ public class CustomerService {
         } else if (password == null || password.isBlank()) {
             return new CustomerResult(null, Feedback.EMPTY_PASSWORD);
         }
-        Customer savedCustomer = customerRepository.findByEmail(email).stream().findAny().orElse(null);
+        Customer savedCustomer = customerRepo.findByEmail(email).stream().findAny().orElse(null);
         if (savedCustomer != null) {
-            if (passwordEncoder.matches(password, savedCustomer.getPassword())) {
-//            savedCustomer = customerRepository.findByEmail(email).stream().filter(customer ->
-//                    passwordEncoder.matches(password, customer.getPassword())).findAny().orElse(null);
-//            if (savedCustomer != null) {
-                return new CustomerResult(toDTO(savedCustomer), Feedback.OK);
-            } else {
-                return new CustomerResult(null, Feedback.INVALID_PASSWORD);
-            }
+            return  (passwordEncoder.matches(password, savedCustomer.getPassword())) ?
+                    new CustomerResult(toDTO(savedCustomer), Feedback.OK) : new CustomerResult(null, Feedback.INVALID_PASSWORD);
         }
         return new CustomerResult(null, Feedback.INVALID_EMAIL);
     }

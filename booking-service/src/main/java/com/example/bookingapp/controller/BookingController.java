@@ -47,7 +47,7 @@ public class BookingController {
     }
 
     @GetMapping("/customer/completed/{customerid}")
-    public List<BookingDTO> getFulfilledBookingsForCustomer(@PathVariable Long customerid) {
+    public List<BookingDTO> getCompletedBookingsForCustomer(@PathVariable Long customerid) {
         return bookingService.getCompletedBookingsByCustomerId(customerid);
     }
 

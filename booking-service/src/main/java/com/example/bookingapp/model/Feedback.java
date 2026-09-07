@@ -1,6 +1,5 @@
 package com.example.bookingapp.model;
 
-
 public enum Feedback {OK("ok"), EMPTY_EMAIL("Email is required"),
     EMPTY_PASSWORD("password is required"),
     INVALID_EMAIL("The email does not exist"),

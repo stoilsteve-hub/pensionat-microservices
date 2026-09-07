@@ -27,10 +27,7 @@ public class CustomerRestController {
     @GetMapping("/{id}")
     public ResponseEntity<CustomerDTO> getCustomer(@PathVariable Long id) {
         CustomerDTO customer = customerService.getCustomerById(id);
-        if (customer != null) {
-            return ResponseEntity.ok(customer);
-        }
-        return ResponseEntity.notFound().build();
+        return (customer != null) ? ResponseEntity.ok(customer) : ResponseEntity.notFound().build();
     }
 
     @PostMapping("/login")
@@ -44,15 +41,15 @@ public class CustomerRestController {
                 result.dto().getEmail());
 
         return ResponseEntity.ok(new LoginResponseDTO(result.dto(),token));
+        return (result.feedback() == Feedback.OK) ? ResponseEntity.ok(result.dto()) :
+                ResponseEntity.status(getStatusFromFeedback(result.feedback(), false)).build();
     }
 
     @PostMapping("/signup")
     public ResponseEntity<CustomerDTO> registerCustomer(@RequestBody CustomerDTO customer) {
         CustomerResult result = customerService.signupRequestIsValid(customer);
-        if (result.feedback() != Feedback.OK){
-            return ResponseEntity.status(getStatusFromFeedback(result.feedback(), true)).build();
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).body(result.dto());
+        return (result.feedback() == Feedback.OK) ? ResponseEntity.status(HttpStatus.CREATED).body(result.dto()) :
+                ResponseEntity.status(getStatusFromFeedback(result.feedback(), true)).build();
     }
 
     @PutMapping("/{id}")
@@ -70,6 +67,7 @@ public class CustomerRestController {
             return ResponseEntity.ok(updated.dto());
         }
         return ResponseEntity.notFound().build();
+        return (updated != null) ? ResponseEntity.ok(updated.dto()) : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
@@ -83,6 +81,8 @@ public class CustomerRestController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         CustomerResult result = customerService.deleteCustomer(id);
+        return (result.feedback() == Feedback.OK) ? ResponseEntity.ok().build() :
+                ResponseEntity.status(getStatusFromFeedback(result.feedback(), false)).build();
 
         if (result.feedback() != Feedback.OK) {
             return ResponseEntity.status(getStatusFromFeedback(result.feedback(), false)).build();

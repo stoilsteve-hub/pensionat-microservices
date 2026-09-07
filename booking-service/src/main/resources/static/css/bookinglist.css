@@ -13,9 +13,7 @@
     backdrop-filter: blur(6px);
 }
 
-.completed-bookings {
-    margin-top: 40px;
-}
+.completed-bookings {margin-top: 40px;}
 
 .bookings-header {
     font-family: "Playfair Display", serif;
@@ -142,4 +140,11 @@
         width: 58px;
         height: 44px;
     }
+}
+
+.empty-bookings-message {
+    text-align: center;
+    padding: 30px;
+    color: #7a6a63;
+    font-style: italic;
 }
