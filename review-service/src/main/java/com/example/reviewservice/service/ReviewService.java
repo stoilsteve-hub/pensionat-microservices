@@ -5,11 +5,8 @@ import com.example.reviewservice.repository.ReviewRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class ReviewService {
@@ -21,63 +18,92 @@ public class ReviewService {
         this.restTemplate = new RestTemplate();
     }
 
-    public void saveReview(ReviewRequestDTO request) {
+    public ReviewCustomerDTO fetchReviewCustomerDTO(Long customerId){
+        try {
+            ResponseEntity<ReviewCustomerDTO> customerResponse = restTemplate.getForEntity(
+                    "http://customer-service:8081/api/customers/review/" + customerId, ReviewCustomerDTO.class);
+            if (!customerResponse.getStatusCode().is2xxSuccessful() || customerResponse.getBody() == null) {
+                return null;
+            }
+            return customerResponse.getBody();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public ReviewBookingDTO fetchBookingDTO(Long customerId, Long roomId, LocalDate startDate, LocalDate endDate) {
+        try {
+            String url = "http://booking-service:8080/bookings/customer/review" + "?customerId=" + customerId +
+                    "&roomId=" + roomId + "&startDate=" + startDate + "&endDate=" + endDate;
+            ResponseEntity<ReviewBookingDTO> bookingResponse = restTemplate.getForEntity(url, ReviewBookingDTO.class);
+            if (!bookingResponse.getStatusCode().is2xxSuccessful() || bookingResponse.getBody() == null) {
+                return null;
+            }
+            return bookingResponse.getBody();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public boolean saveReview(ReviewRequestDTO request) {
+        if (!reviewRequestIsValid(request)) {
+            return false;
+        }
         Review review = new Review();
         review.setRoomId(request.getRoomId());
         review.setCustomerId(request.getCustomerId());
         review.setRating(request.getRating());
         review.setComment(request.getComment());
         review.setSubmitDate(LocalDate.now());
+        review.setStartDate(request.getStartDate());
+        review.setEndDate(request.getEndDate());
         reviewRepository.save(review);
+        return true;
+    }
+
+    public boolean reviewRequestIsValid(ReviewRequestDTO r) {
+        if (r == null || r.getCustomerId() == null || r.getRoomId() == null || r.getStartDate() == null || r.getEndDate() == null) {
+            return false;
+        }
+        if (reviewRepository.existsByCustomerIdAndRoomIdAndStartDateAndEndDate(r.getCustomerId(),
+                r.getRoomId(), r.getStartDate(), r.getEndDate())) {
+            return false;
+        }
+        if (r.getRating() < 1 || r.getRating() > 5) {
+            return false;
+        }
+        if (r.getComment() == null || r.getComment().isBlank()) {
+            return false;
+        }
+        ReviewCustomerDTO customer = fetchReviewCustomerDTO(r.getCustomerId());
+        if (customer == null) {
+            return false;
+        }
+        ReviewBookingDTO booking = fetchBookingDTO(r.getCustomerId(), r.getRoomId(), r.getStartDate(), r.getEndDate());
+        return booking != null;
     }
 
     public ReviewCollectionDTO getReviewsForRoom(Long roomId) {
         List<Review> reviews = reviewRepository.findByRoomId(roomId);
         List<ReviewDTO> reviewDTOs = new ArrayList<>();
         double totalRating = 0;
-
         for (Review r : reviews) {
+            System.out.print("r.id: " + r.getCustomerId());
             ReviewDTO dto = new ReviewDTO();
             dto.setStars(r.getRating());
             dto.setComments(r.getComment());
             dto.setSubmitdate(r.getSubmitDate());
-
-            try {
-                ResponseEntity<CustomerDTO> response = restTemplate.getForEntity("http://customer-service:8081/api/customers/" + r.getCustomerId(), CustomerDTO.class);
-                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                    dto.setCustomer(response.getBody().getName());
-                } else {
-                    dto.setCustomer("Unknown Customer");
-                }
-            } catch (Exception e) {
+            dto.setStartdate(r.getStartDate());
+            dto.setEnddate(r.getEndDate());
+            ReviewCustomerDTO response = fetchReviewCustomerDTO(r.getCustomerId());
+            if (response != null) {
+                dto.setCustomer(response.getName());
+            } else {
                 dto.setCustomer("Unknown Customer");
             }
-
-            BookingDTO latestBooking = null;
-            try {
-                ResponseEntity<BookingDTO[]> bookingResponse = restTemplate.getForEntity("http://booking-service:8080/bookings/customer/" + r.getCustomerId(), BookingDTO[].class);
-                if (bookingResponse.getStatusCode().is2xxSuccessful() && bookingResponse.getBody() != null) {
-                    List<BookingDTO> bookings = Arrays.asList(bookingResponse.getBody());
-                    for (BookingDTO b : bookings) {
-                        if (b.getRoomid().equals(roomId)) {
-                            if (latestBooking == null || b.getStartdate().isAfter(latestBooking.getStartdate())) {
-                                latestBooking = b;
-                            }
-                        }
-                    }
-                }
-            } catch (Exception e) {
-            }
-            
-            if (latestBooking != null) {
-                dto.setStartdate(latestBooking.getStartdate());
-                dto.setEnddate(latestBooking.getEnddate());
-            }
-
             reviewDTOs.add(dto);
             totalRating += r.getRating();
         }
-
         ReviewCollectionDTO collection = new ReviewCollectionDTO();
         collection.setReviews(reviewDTOs);
         collection.setTotalReviews(reviews.size());
@@ -86,7 +112,6 @@ public class ReviewService {
         } else {
             collection.setAverage(0);
         }
-
         return collection;
     }
 }

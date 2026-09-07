@@ -1,5 +1,10 @@
 package com.example.bookingapp.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class LoginResponseDTO {
 
     private CustomerDTO customer;
@@ -10,22 +15,6 @@ public class LoginResponseDTO {
 
     public LoginResponseDTO(CustomerDTO customer, String token) {
         this.customer = customer;
-        this.token = token;
-    }
-
-    public CustomerDTO getCustomer() {
-        return customer;
-    }
-
-    public void setCustomer(CustomerDTO customer) {
-        this.customer = customer;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
         this.token = token;
     }
 }

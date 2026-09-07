@@ -36,6 +36,12 @@ public class BookingService {
         return bookingList != null ? toDTOList(bookingList) : Collections.emptyList();
     }
 
+
+    public ReviewBookingDTO getReviewBookingByCustomerIdAndTimePeriod(Long customerId, Long roomId, LocalDate startdate, LocalDate enddate) {
+        Booking booking = bookingRepo.findByCustomeridAndRoomidAndStartdateAndEnddateAndStatus(customerId, roomId, startdate, enddate, Booking.BookingStatus.COMPLETED);
+        return booking != null ? new ReviewBookingDTO(startdate, enddate) : null;
+    }
+
     public boolean hasActiveBooking(Long customerId) {
         return bookingRepo.existsByCustomeridAndStatus(customerId, Booking.BookingStatus.ACTIVE);
     }
@@ -119,8 +125,8 @@ public class BookingService {
 
     public BookingResult updateBooking(Long bookingId, BookingDTO booking, Long customerId) {
         Booking existing = bookingRepo.findById(bookingId).orElse(null);
-
-        if (existing == null) {return toResult(null, BookingResultStatus.NOT_FOUND);
+        if (existing == null) {
+            return toResult(null, BookingResultStatus.NOT_FOUND);
         }
         if (!existing.getCustomerid().equals(customerId)) {
             return toResult(null, BookingResultStatus.NOT_FOUND);
@@ -135,7 +141,6 @@ public class BookingService {
             existing.setEnddate(booking.getEnddate());
             existing.setExtrabed(booking.isExtrabed());
             existing.setCost(booking.getCost());
-
             return toResult(bookingRepo.save(existing), BookingResultStatus.OK);
         }
         return toResult(null, BookingResultStatus.ROOM_UNAVAILABLE);

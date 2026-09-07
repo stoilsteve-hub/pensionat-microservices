@@ -77,7 +77,7 @@ function showBookingDetails(booking, active) {
         document.querySelector(".delete-booking-button").onclick = () => showBookingDeleteConfirm(booking);
     }
     else {
-        document.querySelector(".review-booking-button").onclick = () => leaveReview(booking.roomid, customerId, modalBody, modalFooter);
+        document.querySelector(".review-booking-button").onclick = () => leaveReview(booking, modalBody, modalFooter);
     }
     modal.show();
 }

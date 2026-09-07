@@ -18,8 +18,7 @@ public class ReviewController {
 
     @PostMapping
     public ResponseEntity<Void> addReview(@RequestBody ReviewRequestDTO request) {
-        reviewService.saveReview(request);
-        return ResponseEntity.ok().build();
+        return reviewService.saveReview(request) ? ResponseEntity.ok().build() : ResponseEntity.badRequest().build();
     }
 
     @GetMapping("/room/{roomId}")
