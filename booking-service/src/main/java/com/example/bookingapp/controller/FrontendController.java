@@ -84,9 +84,9 @@ public class FrontendController {
         System.out.println("CustomerDTO: " + responseDTO.getCustomerDTO());
         if (responseDTO.getFeedback() == Feedback.OK) {
             session.setAttribute("loginCustomerId", responseDTO.getCustomerDTO().getId());
+            session.setAttribute("jwtToken", responseDTO.getToken());
             if (Boolean.TRUE.equals(returnToBook) && roomId != null) {
-                return "redirect:/book?roomId=" + roomId;
-            }
+                return "redirect:/book?roomId=" + roomId;}
             return "redirect:/profile";
         }
         model.addAttribute("error", responseDTO.getFeedback().feedback);
