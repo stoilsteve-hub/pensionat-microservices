@@ -37,6 +37,7 @@ services:
         - SPRING_DATASOURCE_USERNAME=root
         - SPRING_DATASOURCE_PASSWORD=root
         - CUSTOMER_SERVICE_URL=http://customer-service:8081/api/customers
+        - JWT_KEY=${JWT_KEY}
 
   customer-service:
       build: ./customer-service
@@ -49,6 +50,8 @@ services:
         - SPRING_DATASOURCE_URL=jdbc:mysql://customer-db:3306/customerDB?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
         - SPRING_DATASOURCE_USERNAME=root
         - SPRING_DATASOURCE_PASSWORD=root
+        - JWT_KEY=${JWT_KEY}
+
   review-db:
     image: mysql:8.0
     environment:
@@ -73,3 +76,4 @@ services:
         - SPRING_DATASOURCE_URL=jdbc:mysql://review-db:3306/reviewdb?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
         - SPRING_DATASOURCE_USERNAME=root
         - SPRING_DATASOURCE_PASSWORD=root
+        - JWT_KEY=${JWT_KEY}
