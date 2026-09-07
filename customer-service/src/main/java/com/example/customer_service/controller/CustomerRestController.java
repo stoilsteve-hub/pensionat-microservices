@@ -32,9 +32,9 @@ public class CustomerRestController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> customerExists(@RequestBody LoginRequestDTO requestDTO) {
+    public ResponseEntity<LoginResponseDTO> customerExists(@RequestBody LoginRequestDTO requestDTO){
         CustomerResult result = customerService.loginRequestIsValid(requestDTO);
-        if (result.feedback() != Feedback.OK) {
+        if (result.feedback() != Feedback.OK){
             return ResponseEntity.status(getStatusFromFeedback(result.feedback(), false)).build();
         }
         String token = jwtService.generateToken(result.dto().getId(), result.dto().getEmail());
@@ -42,11 +42,13 @@ public class CustomerRestController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<CustomerDTO> registerCustomer(@RequestBody CustomerDTO customer) {
+    public ResponseEntity<LoginResponseDTO> registerCustomer(@RequestBody CustomerDTO customer) {
         CustomerResult result = customerService.signupRequestIsValid(customer);
-        return (result.feedback() == Feedback.OK)
-                ? ResponseEntity.status(HttpStatus.CREATED).body(result.dto())
-                : ResponseEntity.status(getStatusFromFeedback(result.feedback(), true)).build();
+        if (result.feedback() != Feedback.OK) {
+            return ResponseEntity.status(getStatusFromFeedback(result.feedback(), true)).build();
+        }
+        String token = jwtService.generateToken(result.dto().getId(), result.dto().getEmail());
+        return ResponseEntity.status(HttpStatus.CREATED).body(new LoginResponseDTO(result.dto(), token));
     }
 
     @PutMapping("/{id}")
@@ -69,12 +71,12 @@ public class CustomerRestController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         CustomerResult result = customerService.deleteCustomer(id);
-        return (result.feedback() == Feedback.OK) ? ResponseEntity.ok().build()
-                : ResponseEntity.status(getStatusFromFeedback(result.feedback(), false)).build();
+        return (result.feedback() == Feedback.OK) ? ResponseEntity.ok().build() :
+                ResponseEntity.status(getStatusFromFeedback(result.feedback(), false)).build();
     }
 
     private HttpStatus getStatusFromFeedback(Feedback feedback, boolean create) {
-        return switch (feedback) {
+        return switch (feedback){
             case OK -> create ? HttpStatus.CREATED : HttpStatus.OK;
             case EMPTY_EMAIL, EMPTY_PASSWORD -> HttpStatus.BAD_REQUEST;
             case USER_EXISTS, HAS_ACTIVE_BOOKINGS -> HttpStatus.CONFLICT;

@@ -11,7 +11,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDate;
 import java.util.List;
 
-@Controller public class FrontendController {
+@Controller
+public class FrontendController {
     private final RoomService roomService;
     private final CustomerService customerService;
 
@@ -21,17 +22,18 @@ import java.util.List;
     }
 
     public FrontendController(RoomService roomService, CustomerService customerService) {
-        this.roomService = roomService; this.customerService = customerService;
+        this.roomService = roomService;
+        this.customerService = customerService;
     }
 
     @GetMapping("/home")
-    public String showHomePage(Model model, @RequestParam(required = false) LocalDate startdate,
+    public String showHomePage(Model model,
+                               @RequestParam(required = false) LocalDate startdate,
                                @RequestParam(required = false) LocalDate enddate) {
         if (startdate != null && enddate != null) {
             List<Room> availableRooms = roomService.findAvailableRooms(startdate, enddate);
             model.addAttribute("rooms", availableRooms);
-        }
-        else {
+        } else {
             model.addAttribute("rooms", roomService.getAllRooms());
         }
         return "homepage";
@@ -52,7 +54,8 @@ import java.util.List;
     }
 
     @GetMapping("/book")
-    public String showBookingPage(@RequestParam Long roomId, @RequestParam(required = false) Long bookingId,
+    public String showBookingPage(@RequestParam Long roomId,
+                                  @RequestParam(required = false) Long bookingId,
                                   @RequestParam(required = false) LocalDate startdate,
                                   @RequestParam(required = false) LocalDate enddate, Model model) {
         Room room = roomService.getRoomById(roomId);
@@ -63,7 +66,8 @@ import java.util.List;
         return "bookingpage";
     }
 
-    @GetMapping("/customer") public String showCustomerPage(Model model) {
+    @GetMapping("/customer")
+    public String showCustomerPage(Model model) {
         model.addAttribute("loginCustomer", new CustomerDTO());
         model.addAttribute("signupCustomer", new CustomerDTO());
         return "customer";
@@ -78,7 +82,8 @@ import java.util.List;
         }
         model.addAttribute("error", responseDTO.getFeedback().feedback);
         model.addAttribute("loginCustomer", customer);
-        model.addAttribute("signupCustomer", new CustomerDTO()); return "customer";
+        model.addAttribute("signupCustomer", new CustomerDTO());
+        return "customer";
     }
 
     @PostMapping("/signup")
@@ -91,8 +96,8 @@ import java.util.List;
         model.addAttribute("signupError", responseDTO.getFeedback().feedback);
         model.addAttribute("signupCustomer", customer);
         model.addAttribute("loginCustomer", new CustomerDTO());
-        return "customer"; }
-
+        return "customer";
+    }
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
@@ -154,7 +159,7 @@ import java.util.List;
             return "redirect:/customer";
         }
         CustomerResponseDTO responseDTO = customerService.deleteCustomer(customerId);
-        if (responseDTO.getFeedback() == Feedback.OK) {
+        if(responseDTO.getFeedback() == Feedback.OK) {
             session.invalidate();
             return "redirect:/customer";
         }
@@ -167,6 +172,9 @@ import java.util.List;
     private String getRerouteForValidSignIn(HttpSession session, CustomerResponseDTO responseDTO, Boolean returnToBook, Long roomId ){
         session.setAttribute("loginCustomerId", responseDTO.getCustomerDTO().getId());
         session.setAttribute("jwtToken", responseDTO.getToken());
-        return (Boolean.TRUE.equals(returnToBook) && roomId != null) ? "redirect:/book?roomId=" + roomId : "redirect:/profile";
+        if (Boolean.TRUE.equals(returnToBook) && roomId != null) {
+            return "redirect:/book?roomId=" + roomId;
+        }
+        return "redirect:/profile";
     }
 }

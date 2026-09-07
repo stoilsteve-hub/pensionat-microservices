@@ -36,8 +36,11 @@ public class BookingController {
     }
 
     @GetMapping("/customer/{customerid}")
-    public ResponseEntity<?> getBookingsByCustomerId(@PathVariable Long customerid, Authentication authentication) {
-        Long loggedInCustomerId = (Long) authentication.getPrincipal();
+    public ResponseEntity<?> getBookingsByCustomerId(@PathVariable Long customerid, Authentication auth) {
+        Long loggedInCustomerId = (Long) auth.getPrincipal();
+        if (loggedInCustomerId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         if (!loggedInCustomerId.equals(customerid)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -45,8 +48,11 @@ public class BookingController {
     }
 
     @GetMapping("/customer/active/{customerid}")
-    public ResponseEntity<?> getUpcomingBookingsByCustomerId(@PathVariable Long customerid, Authentication authentication) {
-        Long loggedInCustomerId = (Long) authentication.getPrincipal();
+    public ResponseEntity<?> getUpcomingBookingsByCustomerId(@PathVariable Long customerid, Authentication auth) {
+        Long loggedInCustomerId = (Long) auth.getPrincipal();
+        if (loggedInCustomerId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         if (!loggedInCustomerId.equals(customerid)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -54,8 +60,11 @@ public class BookingController {
     }
 
     @GetMapping("/customer/completed/{customerid}")
-    public ResponseEntity<?> getCompletedBookingsForCustomer(@PathVariable Long customerid, Authentication authentication) {
-        Long loggedInCustomerId = (Long) authentication.getPrincipal();
+    public ResponseEntity<?> getCompletedBookingsForCustomer(@PathVariable Long customerid, Authentication auth) {
+        Long loggedInCustomerId = (Long) auth.getPrincipal();
+        if (loggedInCustomerId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         if (!loggedInCustomerId.equals(customerid)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -116,6 +125,7 @@ public class BookingController {
         Long customerId = (Long) authentication.getPrincipal();
         BookingResult response = bookingService.cancelBooking(bookingId, customerId);
         HttpStatus status = getStatus(response.status());
+
         if (status != HttpStatus.OK) {
             return ResponseEntity.status(status).build();
         }
