@@ -48,6 +48,7 @@ public class SecurityConfig {
                         SessionCreationPolicy.IF_REQUIRED))
                 .addFilterBefore(jwtFilter,
                         UsernamePasswordAuthenticationFilter.class)
+                .logout(AbstractHttpConfigurer::disable)
                 .build();
     }
 }

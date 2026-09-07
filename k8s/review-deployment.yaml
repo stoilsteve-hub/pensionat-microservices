@@ -17,6 +17,7 @@ spec:
       containers:
         - name: review-service
           image: review-service:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 8082
           env:
