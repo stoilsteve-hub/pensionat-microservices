@@ -2,7 +2,6 @@ package com.example.bookingapp.controller;
 
 import com.example.bookingapp.model.*;
 import com.example.bookingapp.service.*;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -37,18 +36,39 @@ public class BookingController {
     }
 
     @GetMapping("/customer/{customerid}")
-    public List<BookingDTO> getBookingsByCustomerId(@PathVariable Long customerid) {
-        return bookingService.getBookingsByCustomerId(customerid);
+    public ResponseEntity<?> getBookingsByCustomerId(@PathVariable Long customerid, Authentication auth) {
+        Long loggedInCustomerId = (Long) auth.getPrincipal();
+        if (loggedInCustomerId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        if (!loggedInCustomerId.equals(customerid)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(bookingService.getBookingsByCustomerId(customerid));
     }
 
     @GetMapping("/customer/active/{customerid}")
-    public List<BookingDTO> getUpcomingBookingsByCustomerId(@PathVariable Long customerid) {
-        return bookingService.getActiveBookingsByCustomerId(customerid);
+    public ResponseEntity<?> getUpcomingBookingsByCustomerId(@PathVariable Long customerid, Authentication auth) {
+        Long loggedInCustomerId = (Long) auth.getPrincipal();
+        if (loggedInCustomerId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        if (!loggedInCustomerId.equals(customerid)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(bookingService.getActiveBookingsByCustomerId(customerid));
     }
 
     @GetMapping("/customer/completed/{customerid}")
-    public List<BookingDTO> getCompletedBookingsForCustomer(@PathVariable Long customerid) {
-        return bookingService.getCompletedBookingsByCustomerId(customerid);
+    public ResponseEntity<?> getCompletedBookingsForCustomer(@PathVariable Long customerid, Authentication auth) {
+        Long loggedInCustomerId = (Long) auth.getPrincipal();
+        if (loggedInCustomerId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        if (!loggedInCustomerId.equals(customerid)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(bookingService.getCompletedBookingsByCustomerId(customerid));
     }
 
     @GetMapping("/room/{roomid}")
@@ -82,7 +102,6 @@ public class BookingController {
         Long customerId = (Long) authentication.getPrincipal();
         BookingResult response = bookingService.createBooking(booking, customerId);
         HttpStatus status = getStatus(response.status());
-
         if (response.dto() == null) {
             return ResponseEntity.status(status).build();
         }
@@ -95,7 +114,6 @@ public class BookingController {
         Long customerId = (Long) authentication.getPrincipal();
         BookingResult response = bookingService.updateBooking(bookingId, booking, customerId);
         HttpStatus status = getStatus(response.status());
-
         if (status != HttpStatus.OK) {
             return ResponseEntity.status(status).build();
         }
@@ -121,17 +139,5 @@ public class BookingController {
             case NOT_FOUND -> HttpStatus.NOT_FOUND;
             case ROOM_UNAVAILABLE -> HttpStatus.CONFLICT;
         };
-    }
-
-    private ResponseEntity<Long> validate(HttpSession session) {
-        Long customerId = (Long) session.getAttribute("loginCustomerId");
-        if (customerId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        ResponseEntity<Object> authResponse = bookingService.isAuthorizedCustomer(customerId);
-        if (authResponse.getStatusCode().equals(HttpStatus.OK)) {
-            return ResponseEntity.ok(customerId);
-        }
-        return ResponseEntity.status(authResponse.getStatusCode()).build();
     }
 }
