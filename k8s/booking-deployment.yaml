@@ -17,6 +17,7 @@ spec:
       containers:
         - name: booking-service
           image: booking-service:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 8080
           env:
