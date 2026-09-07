@@ -27,6 +27,8 @@ public class SecurityConfig {
                                 "/search",
                                 "/book",
                                 "/customer",
+                                "/profile",
+                                "/profile/**",
                                 "/login",
                                 "/signup",
                                 "/logout",
