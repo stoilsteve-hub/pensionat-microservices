@@ -2,6 +2,7 @@ package com.example.customer_service.controller;
 
 import com.example.customer_service.model.*;
 import com.example.customer_service.service.CustomerService;
+import com.example.customer_service.service.JwtService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,9 +12,11 @@ import java.util.List;
 @RequestMapping("/api/customers")
 public class CustomerRestController {
     private final CustomerService customerService;
+    private final JwtService jwtService;
 
-    public CustomerRestController(CustomerService customerService) {
+    public CustomerRestController(CustomerService customerService, JwtService jwtService) {
         this.customerService = customerService;
+        this.jwtService = jwtService;
     }
 
     @GetMapping
@@ -28,8 +31,16 @@ public class CustomerRestController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<CustomerDTO> customerExists(@RequestBody LoginRequestDTO requestDTO){
+    public ResponseEntity<LoginResponseDTO> customerExists(@RequestBody LoginRequestDTO requestDTO){
         CustomerResult result = customerService.loginRequestIsValid(requestDTO);
+        if (result.feedback() != Feedback.OK){
+            return ResponseEntity.status(getStatusFromFeedback(result.feedback(), false)).build();
+        }
+        String token = jwtService.generateToken(
+                result.dto().getId(),
+                result.dto().getEmail());
+
+        return ResponseEntity.ok(new LoginResponseDTO(result.dto(),token));
         return (result.feedback() == Feedback.OK) ? ResponseEntity.ok(result.dto()) :
                 ResponseEntity.status(getStatusFromFeedback(result.feedback(), false)).build();
     }
@@ -42,16 +53,41 @@ public class CustomerRestController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CustomerDTO> updateCustomer(@PathVariable Long id, @RequestBody CustomerDTO customer) {
+    public ResponseEntity<CustomerDTO> updateCustomer(
+            @PathVariable Long id, @RequestBody CustomerDTO customer, @RequestHeader("Authorization") String authorization) {
+        String token = authorization.substring(7);
+        Long authenticatedCustomerId = jwtService.extractCustomerId(token);
+
+        if (!authenticatedCustomerId.equals(id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         CustomerResult updated = customerService.updateCustomer(id, customer);
+
+        if (updated != null) {
+            return ResponseEntity.ok(updated.dto());
+        }
+        return ResponseEntity.notFound().build();
         return (updated != null) ? ResponseEntity.ok(updated.dto()) : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteCustomer(
+            @PathVariable Long id, @RequestHeader("Authorization") String authorization) {
+
+        String token = authorization.substring(7);
+        Long authenticatedCustomerId = jwtService.extractCustomerId(token);
+
+        if (!authenticatedCustomerId.equals(id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         CustomerResult result = customerService.deleteCustomer(id);
         return (result.feedback() == Feedback.OK) ? ResponseEntity.ok().build() :
                 ResponseEntity.status(getStatusFromFeedback(result.feedback(), false)).build();
+
+        if (result.feedback() != Feedback.OK) {
+            return ResponseEntity.status(getStatusFromFeedback(result.feedback(), false)).build();
+        }
+        return ResponseEntity.ok().build();
     }
 
     private HttpStatus getStatusFromFeedback(Feedback feedback, boolean create) {

@@ -4,6 +4,7 @@ import com.example.bookingapp.model.*;
 import com.example.bookingapp.service.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.*;
@@ -77,46 +78,40 @@ public class BookingController {
     }
 
     @PostMapping("")
-    public ResponseEntity<BookingDTO> createBooking(@RequestBody BookingDTO booking, HttpSession session) {
-        ResponseEntity<Long> validateUser = validate(session);
-        if (validateUser.getStatusCode() == HttpStatus.OK) {
-            Long customerId = validateUser.getBody();
-            BookingResult response = bookingService.createBooking(booking, customerId);
-            HttpStatus status = getStatus(response.status());
-            if (response.dto() == null) {
-                return ResponseEntity.status(status).build();
-            }
-            return ResponseEntity.status(HttpStatus.CREATED).body(response.dto());
+    public ResponseEntity<BookingDTO> createBooking(@RequestBody BookingDTO booking, Authentication authentication) {
+        Long customerId = (Long) authentication.getPrincipal();
+        BookingResult response = bookingService.createBooking(booking, customerId);
+        HttpStatus status = getStatus(response.status());
+
+        if (response.dto() == null) {
+            return ResponseEntity.status(status).build();
         }
-        return ResponseEntity.status(validateUser.getStatusCode()).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(response.dto());
     }
 
     @PutMapping("/{bookingId}")
-    public ResponseEntity<BookingDTO> updateBooking(@PathVariable Long bookingId, @RequestBody BookingDTO booking, HttpSession session) {
-        ResponseEntity<Long> validateUser = validate(session);
-        if (validateUser.getStatusCode() == HttpStatus.OK) {
-            BookingResult response = bookingService.updateBooking(bookingId, booking);
-            HttpStatus status = getStatus(response.status());
-            if (status != HttpStatus.OK) {
-                return ResponseEntity.status(status).build();
-            }
-            return ResponseEntity.status(status).body(response.dto());
+    public ResponseEntity<BookingDTO> updateBooking(
+            @PathVariable Long bookingId, @RequestBody BookingDTO booking, Authentication authentication) {
+        Long customerId = (Long) authentication.getPrincipal();
+        BookingResult response = bookingService.updateBooking(bookingId, booking, customerId);
+        HttpStatus status = getStatus(response.status());
+
+        if (status != HttpStatus.OK) {
+            return ResponseEntity.status(status).build();
         }
-        return ResponseEntity.status(validateUser.getStatusCode()).build();
+        return ResponseEntity.ok(response.dto());
     }
 
     @PutMapping("/{bookingId}/cancel")
-    public ResponseEntity<BookingDTO> cancelBooking(@PathVariable Long bookingId, HttpSession session) {
-        ResponseEntity<Long> validateUser = validate(session);
-        if (validateUser.getStatusCode() == HttpStatus.OK) {
-            BookingResult response = bookingService.cancelBooking(bookingId);
-            HttpStatus status = getStatus(response.status());
-            if (status != HttpStatus.OK) {
-                return ResponseEntity.status(status).build();
-            }
-            return ResponseEntity.status(status).body(response.dto());
+    public ResponseEntity<BookingDTO> cancelBooking(@PathVariable Long bookingId, Authentication authentication) {
+        Long customerId = (Long) authentication.getPrincipal();
+        BookingResult response = bookingService.cancelBooking(bookingId, customerId);
+        HttpStatus status = getStatus(response.status());
+
+        if (status != HttpStatus.OK) {
+            return ResponseEntity.status(status).build();
         }
-        return ResponseEntity.status(validateUser.getStatusCode()).build();
+        return ResponseEntity.ok(response.dto());
     }
 
     private HttpStatus getStatus(BookingResultStatus response){
