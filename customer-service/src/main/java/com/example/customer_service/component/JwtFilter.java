@@ -9,27 +9,24 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.*;
 import org.springframework.security.core.*;
 import org.springframework.stereotype.Component;
-
 import java.io.IOException;
 import java.util.List;
 
-@Component
-public class JwtFilter extends OncePerRequestFilter {
+@Component public class JwtFilter extends OncePerRequestFilter {
     private final JwtService jwt;
-    JwtFilter(JwtService j){this.jwt = j;}
 
-    @Override
-    protected void doFilterInternal(
-            HttpServletRequest req,
-            HttpServletResponse res,
-            FilterChain chain) throws ServletException, IOException {
+    JwtFilter(JwtService j){
+        this.jwt = j;
+    }
+
+    @Override protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res,
+                                              FilterChain chain) throws ServletException, IOException {
         String h = req.getHeader("Authorization");
         if (h != null && h.startsWith("Bearer ")) {
             String token = h.substring(7);
             if (jwt.isTokenValid(token)) {
                 String email = jwt.extractEmail(token);
-                var auth = new UsernamePasswordAuthenticationToken(
-                        email, null, List.of());
+                var auth = new UsernamePasswordAuthenticationToken(email, null, List.of());
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
         }

@@ -11,15 +11,13 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import java.util.*;
 
-@Service
-public class CustomerService {
+@Service public class CustomerService {
     private final CustomerRepository customerRepo;
     private final RestTemplate restTemplate;
     private final PasswordEncoder passwordEncoder;
 
     public CustomerService(RestTemplateConfig restTemplateConfig, CustomerRepository customerRepo, PasswordEncoder passwordEncoder) {
-        this.customerRepo = customerRepo;
-        this.passwordEncoder = passwordEncoder;
+        this.customerRepo = customerRepo; this.passwordEncoder = passwordEncoder;
         this.restTemplate = restTemplateConfig.restTemplate();
     }
 
@@ -63,8 +61,8 @@ public class CustomerService {
         if (existingCustomer.isPresent()) {
             return new CustomerResult(null, Feedback.USER_EXISTS);
         }
-        Customer newCustomer = (customerRepo.save(new Customer(dto.getName(), dto.getEmail(), dto.getAddress(),
-                dto.getPhone(), passwordEncoder.encode(dto.getPassword()))));
+        Customer newCustomer = (customerRepo.save(new Customer(dto.getName(), dto.getEmail(),
+                dto.getAddress(), dto.getPhone(), passwordEncoder.encode(dto.getPassword()))));
         return new CustomerResult(toDTO(newCustomer), Feedback.OK);
     }
 
@@ -72,14 +70,12 @@ public class CustomerService {
         Customer existing = customerRepo.findById(id).orElse(null);
         if (existing == null) {
             return new CustomerResult(null, Feedback.INVALID_USER);
-        }
-        Optional<Customer> emailOwner = customerRepo.findByEmail(customer.getEmail());
+        } Optional<Customer> emailOwner = customerRepo.findByEmail(customer.getEmail());
         if (emailOwner.isPresent() && !emailOwner.get().getId().equals(id)) {
             return new CustomerResult(null, Feedback.USER_EXISTS);
         }
         existing.setName(customer.getName());
-        existing.setEmail(customer.getEmail());
-        existing.setAddress(customer.getAddress());
+        existing.setEmail(customer.getEmail()); existing.setAddress(customer.getAddress());
         existing.setPhone(customer.getPhone());
         if (customer.getPassword() != null && !customer.getPassword().isBlank()) {
             existing.setPassword(passwordEncoder.encode(customer.getPassword()));
@@ -94,10 +90,8 @@ public class CustomerService {
         }
         if (Boolean.TRUE.equals(response.getBody())) {
             return new CustomerResult(null, Feedback.HAS_ACTIVE_BOOKINGS);
-        }
-        Customer customer = customerRepo.findById(customerId).orElse(null);
-        if (customer != null) {
-            customerRepo.deleteById(customerId);
+        } Customer customer = customerRepo.findById(customerId).orElse(null);
+        if (customer != null) { customerRepo.deleteById(customerId);
             return new CustomerResult(null, Feedback.OK);
         }
         return new CustomerResult(null, Feedback.INVALID_USER);
@@ -105,13 +99,11 @@ public class CustomerService {
 
     public ResponseEntity<Boolean> hasActiveBooking(Long customerId) {
         try {
-            return restTemplate.getForEntity("http://booking-service:8080/bookings/customer/" + customerId
-                    + "/has-active-booking", Boolean.class);
-        }
-        catch (HttpStatusCodeException e) {
+            return restTemplate.getForEntity("http://booking-service:8080/bookings/customer/"
+                    + customerId + "/has-active-booking", Boolean.class);
+        } catch (HttpStatusCodeException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
-        }
-        catch (ResourceAccessException e) {
+        } catch (ResourceAccessException e) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
         }
     }
@@ -119,13 +111,15 @@ public class CustomerService {
     public CustomerResult loginCustomer(String email, String password) {
         if (email == null || email.isBlank()) {
             return new CustomerResult(null, Feedback.EMPTY_EMAIL);
-        } else if (password == null || password.isBlank()) {
+        }
+        else if (password == null || password.isBlank()) {
             return new CustomerResult(null, Feedback.EMPTY_PASSWORD);
         }
         Customer savedCustomer = customerRepo.findByEmail(email).stream().findAny().orElse(null);
         if (savedCustomer != null) {
-            return  (passwordEncoder.matches(password, savedCustomer.getPassword())) ?
-                    new CustomerResult(toDTO(savedCustomer), Feedback.OK) : new CustomerResult(null, Feedback.INVALID_PASSWORD);
+            return (passwordEncoder.matches(password, savedCustomer.getPassword()))
+                    ? new CustomerResult(toDTO(savedCustomer), Feedback.OK)
+                    : new CustomerResult(null, Feedback.INVALID_PASSWORD);
         }
         return new CustomerResult(null, Feedback.INVALID_EMAIL);
     }

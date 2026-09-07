@@ -14,16 +14,13 @@ import org.springframework.web.client.RestTemplate;
 import java.time.*;
 import java.util.*;
 
-@Service
-public class BookingService {
+@Service public class BookingService {
     private final BookingRepository bookingRepo;
     private final RestTemplate restTemplate;
     @Value("${customer.service.url}")
     private String customerServiceUrl;
-
     public BookingService(BookingRepository bookingRepo, RestTemplateConfig restTemplateConfig) {
-        this.bookingRepo = bookingRepo;
-        this.restTemplate = restTemplateConfig.restTemplate();
+        this.bookingRepo = bookingRepo; this.restTemplate = restTemplateConfig.restTemplate();
     }
 
     public BookingDTO getBookingById(Long id) {
@@ -53,7 +50,8 @@ public class BookingService {
     }
 
     public BookingDTO toDTO(Booking b) {
-        return new BookingDTO(b.getId(), b.getRoomid(), b.getCost(), b.getStartdate(), b.getEnddate(), b.getGuestcount(), b.isExtrabed());
+        return new BookingDTO(b.getId(), b.getRoomid(), b.getCost(), b.getStartdate(), b.getEnddate(), b.getGuestcount(),
+                b.isExtrabed());
     }
 
     public List<BookingDTO> toDTOList(List<Booking> bookingList) {
@@ -119,8 +117,8 @@ public class BookingService {
 
     public BookingResult updateBooking(Long bookingId, BookingDTO booking, Long customerId) {
         Booking existing = bookingRepo.findById(bookingId).orElse(null);
-
-        if (existing == null) {return toResult(null, BookingResultStatus.NOT_FOUND);
+        if (existing == null) {
+            return toResult(null, BookingResultStatus.NOT_FOUND);
         }
         if (!existing.getCustomerid().equals(customerId)) {
             return toResult(null, BookingResultStatus.NOT_FOUND);
@@ -135,7 +133,6 @@ public class BookingService {
             existing.setEnddate(booking.getEnddate());
             existing.setExtrabed(booking.isExtrabed());
             existing.setCost(booking.getCost());
-
             return toResult(bookingRepo.save(existing), BookingResultStatus.OK);
         }
         return toResult(null, BookingResultStatus.ROOM_UNAVAILABLE);
@@ -143,7 +140,6 @@ public class BookingService {
 
     public BookingResult cancelBooking(Long id, Long customerId) {
         Booking existingBooking = bookingRepo.findById(id).orElse(null);
-
         if (existingBooking == null) {
             return toResult(null, BookingResultStatus.NOT_FOUND);
         }
@@ -151,7 +147,6 @@ public class BookingService {
             return toResult(null, BookingResultStatus.NOT_FOUND);
         }
         existingBooking.setStatus(Booking.BookingStatus.CANCELLED);
-
         return toResult(bookingRepo.save(existingBooking), BookingResultStatus.OK);
     }
 

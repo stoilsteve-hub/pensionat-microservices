@@ -11,8 +11,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDate;
 import java.util.List;
 
-@Controller
-public class FrontendController {
+@Controller public class FrontendController {
     private final RoomService roomService;
     private final CustomerService customerService;
 
@@ -22,18 +21,17 @@ public class FrontendController {
     }
 
     public FrontendController(RoomService roomService, CustomerService customerService) {
-        this.roomService = roomService;
-        this.customerService = customerService;
+        this.roomService = roomService; this.customerService = customerService;
     }
 
     @GetMapping("/home")
-    public String showHomePage(Model model,
-                               @RequestParam(required = false) LocalDate startdate,
+    public String showHomePage(Model model, @RequestParam(required = false) LocalDate startdate,
                                @RequestParam(required = false) LocalDate enddate) {
         if (startdate != null && enddate != null) {
             List<Room> availableRooms = roomService.findAvailableRooms(startdate, enddate);
             model.addAttribute("rooms", availableRooms);
-        } else {
+        }
+        else {
             model.addAttribute("rooms", roomService.getAllRooms());
         }
         return "homepage";
@@ -54,8 +52,7 @@ public class FrontendController {
     }
 
     @GetMapping("/book")
-    public String showBookingPage(@RequestParam Long roomId,
-                                  @RequestParam(required = false) Long bookingId,
+    public String showBookingPage(@RequestParam Long roomId, @RequestParam(required = false) Long bookingId,
                                   @RequestParam(required = false) LocalDate startdate,
                                   @RequestParam(required = false) LocalDate enddate, Model model) {
         Room room = roomService.getRoomById(roomId);
@@ -66,8 +63,7 @@ public class FrontendController {
         return "bookingpage";
     }
 
-    @GetMapping("/customer")
-    public String showCustomerPage(Model model) {
+    @GetMapping("/customer") public String showCustomerPage(Model model) {
         model.addAttribute("loginCustomer", new CustomerDTO());
         model.addAttribute("signupCustomer", new CustomerDTO());
         return "customer";
@@ -78,16 +74,11 @@ public class FrontendController {
                         @RequestParam(required = false) Boolean returnToBook, @RequestParam(required = false) Long roomId) {
         CustomerResponseDTO responseDTO = customerService.loginCustomer(customer.getEmail(), customer.getPassword());
         if (responseDTO.getFeedback() == Feedback.OK) {
-            session.setAttribute("loginCustomerId", responseDTO.getCustomerDTO().getId());
-            session.setAttribute("jwtToken", responseDTO.getToken());
-            if (Boolean.TRUE.equals(returnToBook) && roomId != null) {
-                return "redirect:/book?roomId=" + roomId;}
-            return "redirect:/profile";
+            return getRerouteForValidSignIn(session, responseDTO, returnToBook, roomId);
         }
         model.addAttribute("error", responseDTO.getFeedback().feedback);
         model.addAttribute("loginCustomer", customer);
-        model.addAttribute("signupCustomer", new CustomerDTO());
-        return "customer";
+        model.addAttribute("signupCustomer", new CustomerDTO()); return "customer";
     }
 
     @PostMapping("/signup")
@@ -95,17 +86,13 @@ public class FrontendController {
                          @RequestParam(required = false) Boolean returnToBook, @RequestParam(required = false) Long roomId) {
         CustomerResponseDTO responseDTO = customerService.signupCustomer(customer);
         if (responseDTO.getFeedback() == Feedback.OK) {
-            session.setAttribute("loginCustomerId", responseDTO.getCustomerDTO().getId());
-            if (Boolean.TRUE.equals(returnToBook) && roomId != null) {
-                return "redirect:/book?roomId=" + roomId;
-            }
-            return "redirect:/profile";
+            return getRerouteForValidSignIn(session, responseDTO, returnToBook, roomId);
         }
         model.addAttribute("signupError", responseDTO.getFeedback().feedback);
         model.addAttribute("signupCustomer", customer);
         model.addAttribute("loginCustomer", new CustomerDTO());
-        return "customer";
-    }
+        return "customer"; }
+
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
@@ -167,7 +154,7 @@ public class FrontendController {
             return "redirect:/customer";
         }
         CustomerResponseDTO responseDTO = customerService.deleteCustomer(customerId);
-        if(responseDTO.getFeedback() == Feedback.OK) {
+        if (responseDTO.getFeedback() == Feedback.OK) {
             session.invalidate();
             return "redirect:/customer";
         }
@@ -175,5 +162,11 @@ public class FrontendController {
             redirectAttributes.addFlashAttribute("deleteError", responseDTO.getFeedback().feedback);
             return "redirect:/profile";
         }
+    }
+
+    private String getRerouteForValidSignIn(HttpSession session, CustomerResponseDTO responseDTO, Boolean returnToBook, Long roomId ){
+        session.setAttribute("loginCustomerId", responseDTO.getCustomerDTO().getId());
+        session.setAttribute("jwtToken", responseDTO.getToken());
+        return (Boolean.TRUE.equals(returnToBook) && roomId != null) ? "redirect:/book?roomId=" + roomId : "redirect:/profile";
     }
 }
