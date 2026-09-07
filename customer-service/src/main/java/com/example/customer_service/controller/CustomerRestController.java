@@ -5,7 +5,6 @@ import com.example.customer_service.service.CustomerService;
 import com.example.customer_service.service.JwtService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -37,42 +36,58 @@ public class CustomerRestController {
         if (result.feedback() != Feedback.OK){
             return ResponseEntity.status(getStatusFromFeedback(result.feedback(), false)).build();
         }
-        String token = jwtService.generateToken(result.dto().getId(), result.dto().getEmail());
-        return ResponseEntity.ok(new LoginResponseDTO(result.dto(), token));
+        String token = jwtService.generateToken(
+                result.dto().getId(),
+                result.dto().getEmail());
+
+        return ResponseEntity.ok(new LoginResponseDTO(result.dto(),token));
+        return (result.feedback() == Feedback.OK) ? ResponseEntity.ok(result.dto()) :
+                ResponseEntity.status(getStatusFromFeedback(result.feedback(), false)).build();
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<LoginResponseDTO> registerCustomer(@RequestBody CustomerDTO customer) {
+    public ResponseEntity<CustomerDTO> registerCustomer(@RequestBody CustomerDTO customer) {
         CustomerResult result = customerService.signupRequestIsValid(customer);
-        if (result.feedback() != Feedback.OK) {
-            return ResponseEntity.status(getStatusFromFeedback(result.feedback(), true)).build();
-        }
-        String token = jwtService.generateToken(result.dto().getId(), result.dto().getEmail());
-        return ResponseEntity.status(HttpStatus.CREATED).body(new LoginResponseDTO(result.dto(), token));
+        return (result.feedback() == Feedback.OK) ? ResponseEntity.status(HttpStatus.CREATED).body(result.dto()) :
+                ResponseEntity.status(getStatusFromFeedback(result.feedback(), true)).build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CustomerDTO> updateCustomer(@PathVariable Long id, @RequestBody CustomerDTO customer, Authentication authentication) {
-        Long authenticatedCustomerId = (Long) authentication.getPrincipal();
+    public ResponseEntity<CustomerDTO> updateCustomer(
+            @PathVariable Long id, @RequestBody CustomerDTO customer, @RequestHeader("Authorization") String authorization) {
+        String token = authorization.substring(7);
+        Long authenticatedCustomerId = jwtService.extractCustomerId(token);
+
         if (!authenticatedCustomerId.equals(id)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         CustomerResult updated = customerService.updateCustomer(id, customer);
+
         if (updated != null) {
             return ResponseEntity.ok(updated.dto());
         }
         return ResponseEntity.notFound().build();
+        return (updated != null) ? ResponseEntity.ok(updated.dto()) : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCustomer(@PathVariable Long id, Authentication authentication) {
-        Long authenticatedCustomerId = (Long) authentication.getPrincipal();
+    public ResponseEntity<Void> deleteCustomer(
+            @PathVariable Long id, @RequestHeader("Authorization") String authorization) {
+
+        String token = authorization.substring(7);
+        Long authenticatedCustomerId = jwtService.extractCustomerId(token);
+
         if (!authenticatedCustomerId.equals(id)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         CustomerResult result = customerService.deleteCustomer(id);
         return (result.feedback() == Feedback.OK) ? ResponseEntity.ok().build() :
                 ResponseEntity.status(getStatusFromFeedback(result.feedback(), false)).build();
+
+        if (result.feedback() != Feedback.OK) {
+            return ResponseEntity.status(getStatusFromFeedback(result.feedback(), false)).build();
+        }
+        return ResponseEntity.ok().build();
     }
 
     private HttpStatus getStatusFromFeedback(Feedback feedback, boolean create) {

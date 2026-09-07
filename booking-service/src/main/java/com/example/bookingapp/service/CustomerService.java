@@ -12,7 +12,6 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 public class CustomerService {
-    private final HttpSession session;
     private final RestTemplate restTemplate;
     @Value("${customer.service.url}")
     private String customerServiceUrl;
@@ -25,10 +24,13 @@ public class CustomerService {
     public CustomerResponseDTO loginCustomer(String email, String password) {
         try {
             LoginRequestDTO request = new LoginRequestDTO(email, password);
-            LoginResponseDTO response = restTemplate.postForObject(customerServiceUrl + "/login", request, LoginResponseDTO.class);
+            LoginResponseDTO response =
+                    restTemplate.postForObject(customerServiceUrl + "/login", request, LoginResponseDTO.class);
+
             return (response != null)
                     ? new CustomerResponseDTO(response.getCustomer(), Feedback.OK, response.getToken())
                     : new CustomerResponseDTO(Feedback.CUSTOMER_SERVICE_UNAVAILABLE);
+
         } catch (ResourceAccessException e) {
             return new CustomerResponseDTO(Feedback.CUSTOMER_SERVICE_UNAVAILABLE);
         } catch (HttpStatusCodeException e) {
@@ -37,11 +39,29 @@ public class CustomerService {
     }
 
     public CustomerResponseDTO signupCustomer(CustomerDTO dto) {
+        System.out.println("signupCustomer is called");
+        if (dto != null){
+            System.out.println("dto != null");
+            if (dto.getEmail() != null && dto.getEmail().isBlank()){
+                System.out.println("email is: " + dto.getEmail());
+            }
+            else {
+                System.out.println("email is null");
+            }
+        }
+        else {
+            System.out.println("dto is null");
+        }
         try {
-            LoginResponseDTO response = restTemplate.postForObject(customerServiceUrl + "/signup", dto, LoginResponseDTO.class);
-            return (response != null)
-                    ? new CustomerResponseDTO(response.getCustomer(), Feedback.OK, response.getToken())
-                    : new CustomerResponseDTO(Feedback.CUSTOMER_SERVICE_UNAVAILABLE);
+            CustomerDTO response = restTemplate.postForObject(customerServiceUrl + "/signup", dto, CustomerDTO.class);
+            if (response != null){
+                System.out.println("response != null");
+            }
+            else {
+                System.out.println("response is null");
+            }
+            return (response != null) ? new CustomerResponseDTO(response, Feedback.OK) :
+                    new CustomerResponseDTO(Feedback.CUSTOMER_SERVICE_UNAVAILABLE);
         } catch (ResourceAccessException e) {
             return new CustomerResponseDTO(Feedback.CUSTOMER_SERVICE_UNAVAILABLE);
         } catch (HttpStatusCodeException e) {
@@ -52,7 +72,10 @@ public class CustomerService {
     public CustomerResponseDTO updateCustomer(Long customerId, CustomerDTO customerDTO) {
         try {
             HttpEntity<CustomerDTO> request = new HttpEntity<>(customerDTO, authenticatedHeaders());
-            restTemplate.exchange(customerServiceUrl + "/" + customerId, HttpMethod.PUT, request, CustomerDTO.class);
+
+            restTemplate.exchange(
+                    customerServiceUrl + "/" + customerId, HttpMethod.PUT, request, Void.class);
+
             return new CustomerResponseDTO(Feedback.OK);
         } catch (ResourceAccessException e) {
             return new CustomerResponseDTO(Feedback.CUSTOMER_SERVICE_UNAVAILABLE);
@@ -63,7 +86,9 @@ public class CustomerService {
 
     public CustomerResponseDTO deleteCustomer(Long customerId) {
         try {
-            restTemplate.exchange(customerServiceUrl + "/" + customerId, HttpMethod.DELETE, authenticatedRequest(), Void.class);
+            restTemplate.exchange(
+                    customerServiceUrl + "/" + customerId, HttpMethod.DELETE, authenticatedRequest(), Void.class);
+
             return new CustomerResponseDTO(Feedback.OK);
         } catch (ResourceAccessException e) {
             return new CustomerResponseDTO(Feedback.CUSTOMER_SERVICE_UNAVAILABLE);
@@ -74,10 +99,15 @@ public class CustomerService {
 
     public CustomerResponseDTO getCustomerById(Long customerId) {
         try {
-            ResponseEntity<CustomerDTO> response = restTemplate.exchange(customerServiceUrl + "/" + customerId,
-                    HttpMethod.GET, authenticatedRequest(), CustomerDTO.class);
+            ResponseEntity<CustomerDTO> response =
+                    restTemplate.exchange(customerServiceUrl + "/" + customerId,
+                            HttpMethod.GET, authenticatedRequest(), CustomerDTO.class);
             CustomerDTO dto = response.getBody();
-            return (dto != null) ? new CustomerResponseDTO(dto, Feedback.OK) : new CustomerResponseDTO(Feedback.INVALID_USER);
+
+            return (dto != null)
+                    ? new CustomerResponseDTO(dto, Feedback.OK)
+                    : new CustomerResponseDTO(Feedback.INVALID_USER);
+
         } catch (ResourceAccessException e) {
             return new CustomerResponseDTO(Feedback.CUSTOMER_SERVICE_UNAVAILABLE);
         } catch (HttpStatusCodeException e) {
@@ -85,9 +115,11 @@ public class CustomerService {
         }
     }
 
+
     private HttpEntity<Void> authenticatedRequest() {
         String token = (String) session.getAttribute("jwtToken");
         HttpHeaders headers = new HttpHeaders();
+
         if (token != null && !token.isBlank()) {
             headers.setBearerAuth(token);
         }
@@ -103,6 +135,7 @@ public class CustomerService {
         }
         return headers;
     }
+
 
     private Feedback getFeedbackFromStatus(HttpStatusCode status) {
         return switch (status.value()) {

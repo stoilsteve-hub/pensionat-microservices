@@ -78,7 +78,11 @@ public class FrontendController {
                         @RequestParam(required = false) Boolean returnToBook, @RequestParam(required = false) Long roomId) {
         CustomerResponseDTO responseDTO = customerService.loginCustomer(customer.getEmail(), customer.getPassword());
         if (responseDTO.getFeedback() == Feedback.OK) {
-            return getRerouteForValidSignIn(session, responseDTO, returnToBook, roomId);
+            session.setAttribute("loginCustomerId", responseDTO.getCustomerDTO().getId());
+            session.setAttribute("jwtToken", responseDTO.getToken());
+            if (Boolean.TRUE.equals(returnToBook) && roomId != null) {
+                return "redirect:/book?roomId=" + roomId;}
+            return "redirect:/profile";
         }
         model.addAttribute("error", responseDTO.getFeedback().feedback);
         model.addAttribute("loginCustomer", customer);
@@ -91,7 +95,11 @@ public class FrontendController {
                          @RequestParam(required = false) Boolean returnToBook, @RequestParam(required = false) Long roomId) {
         CustomerResponseDTO responseDTO = customerService.signupCustomer(customer);
         if (responseDTO.getFeedback() == Feedback.OK) {
-            return getRerouteForValidSignIn(session, responseDTO, returnToBook, roomId);
+            session.setAttribute("loginCustomerId", responseDTO.getCustomerDTO().getId());
+            if (Boolean.TRUE.equals(returnToBook) && roomId != null) {
+                return "redirect:/book?roomId=" + roomId;
+            }
+            return "redirect:/profile";
         }
         model.addAttribute("signupError", responseDTO.getFeedback().feedback);
         model.addAttribute("signupCustomer", customer);
@@ -167,14 +175,5 @@ public class FrontendController {
             redirectAttributes.addFlashAttribute("deleteError", responseDTO.getFeedback().feedback);
             return "redirect:/profile";
         }
-    }
-
-    private String getRerouteForValidSignIn(HttpSession session, CustomerResponseDTO responseDTO, Boolean returnToBook, Long roomId ){
-        session.setAttribute("loginCustomerId", responseDTO.getCustomerDTO().getId());
-        session.setAttribute("jwtToken", responseDTO.getToken());
-        if (Boolean.TRUE.equals(returnToBook) && roomId != null) {
-            return "redirect:/book?roomId=" + roomId;
-        }
-        return "redirect:/profile";
     }
 }
