@@ -56,6 +56,10 @@ public class BookingController {
 
     @GetMapping("/customer/active/{customerid}")
     public ResponseEntity<?> getUpcomingBookingsByCustomerId(@PathVariable Long customerid, Authentication auth) {
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         Long loggedInCustomerId = (Long) auth.getPrincipal();
         if (loggedInCustomerId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -68,6 +72,10 @@ public class BookingController {
 
     @GetMapping("/customer/completed/{customerid}")
     public ResponseEntity<?> getCompletedBookingsForCustomer(@PathVariable Long customerid, Authentication auth) {
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         Long loggedInCustomerId = (Long) auth.getPrincipal();
         if (loggedInCustomerId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

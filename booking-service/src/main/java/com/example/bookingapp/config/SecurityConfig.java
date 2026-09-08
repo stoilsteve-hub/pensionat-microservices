@@ -19,6 +19,7 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain chain(HttpSecurity http) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(a -> a
                         .requestMatchers(
@@ -48,6 +49,7 @@ public class SecurityConfig {
                         SessionCreationPolicy.IF_REQUIRED))
                 .addFilterBefore(jwtFilter,
                         UsernamePasswordAuthenticationFilter.class)
+                .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .build();
     }
