@@ -1,6 +1,7 @@
 package com.example.customer_service.model;
 
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 public class CustomerDTO {
@@ -9,6 +10,7 @@ public class CustomerDTO {
     private String email;
     private String address;
     private String phone;
+    @Setter
     private String password;
 
     public CustomerDTO() {

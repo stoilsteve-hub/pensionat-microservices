@@ -59,7 +59,6 @@ public class BookingController {
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
         Long loggedInCustomerId = (Long) auth.getPrincipal();
         if (loggedInCustomerId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -75,7 +74,6 @@ public class BookingController {
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
         Long loggedInCustomerId = (Long) auth.getPrincipal();
         if (loggedInCustomerId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -115,6 +113,10 @@ public class BookingController {
     @PostMapping("")
     public ResponseEntity<BookingDTO> createBooking(@RequestBody BookingDTO booking, Authentication authentication) {
         Long customerId = (Long) authentication.getPrincipal();
+        ResponseEntity<Object> customer = bookingService.isAuthorizedCustomer(customerId);
+        if (!customer.getStatusCode().is2xxSuccessful()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         BookingResult response = bookingService.createBooking(booking, customerId);
         HttpStatus status = getStatus(response.status());
         if (response.dto() == null) {
@@ -124,8 +126,8 @@ public class BookingController {
     }
 
     @PutMapping("/{bookingId}")
-    public ResponseEntity<BookingDTO> updateBooking(
-            @PathVariable Long bookingId, @RequestBody BookingDTO booking, Authentication authentication) {
+    public ResponseEntity<BookingDTO> updateBooking(@PathVariable Long bookingId, @RequestBody BookingDTO booking,
+                                                    Authentication authentication) {
         Long customerId = (Long) authentication.getPrincipal();
         BookingResult response = bookingService.updateBooking(bookingId, booking, customerId);
         HttpStatus status = getStatus(response.status());

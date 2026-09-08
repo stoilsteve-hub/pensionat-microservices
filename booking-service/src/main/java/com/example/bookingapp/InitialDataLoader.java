@@ -27,7 +27,6 @@ public class InitialDataLoader implements CommandLineRunner {
                 singleRoom.setCostPerNight(1000);
                 roomRepo.save(singleRoom);
             }
-
             for (int i = 6; i <= 10; i++) {
                 Room doubleRoom = new Room();
                 doubleRoom.setRoomNumber("10" + i);

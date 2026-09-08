@@ -1,8 +1,7 @@
 package com.example.bookingapp.service;
 
+import com.example.bookingapp.config.RestTemplateConfig;
 import com.example.bookingapp.model.Booking;
-import com.example.bookingapp.model.BookingDTO;
-import com.example.bookingapp.model.BookingResult;
 import com.example.bookingapp.repository.BookingRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,19 +9,21 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.client.RestTemplate;
+
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class BookingServiceTest {
     @Mock
     private BookingRepository bookingRepository;
-
+    @Mock
+    private RestTemplateConfig restTemplateConfig;
+    @Mock
+    private RestTemplate restTemplate;
     @InjectMocks
     private BookingService bookingService;
     private Booking b1;

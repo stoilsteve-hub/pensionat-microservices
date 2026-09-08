@@ -44,8 +44,6 @@ public class SecurityConfig {
                                 "/bookings/customer/**",
                                 "/bookings/room/**")
                         .permitAll().anyRequest().authenticated())
-//                .sessionManagement(s -> s.sessionCreationPolicy(
-//                        SessionCreationPolicy.STATELESS))
                 .sessionManagement(s -> s.sessionCreationPolicy(
                         SessionCreationPolicy.IF_REQUIRED))
                 .addFilterBefore(jwtFilter,

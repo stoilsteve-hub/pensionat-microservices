@@ -26,17 +26,7 @@ public class InitialDataLoader implements CommandLineRunner {
             customer.setAddress("Test Street 1");
             customer.setPhone("0701234567");
             customer.setPassword(passwordEncoder.encode("test123"));
-            Customer savedCustomer = customerRepo.save(customer);
-            System.out.println("customer ID for test@test.se is: " + savedCustomer.getId());
-        }
-        else {
-            Customer savedCustomer = customerRepo.findByEmail("test@test.se").orElse(null);
-            if (savedCustomer != null){
-                System.out.println("customer ID for test@test.se is: " + savedCustomer.getId());
-            }
-            else {
-                System.out.println("savedCustomer is null");
-            }
+            customerRepo.save(customer);
         }
     }
 }
