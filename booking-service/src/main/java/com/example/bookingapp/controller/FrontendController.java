@@ -77,7 +77,7 @@ public class FrontendController {
     public String login(@ModelAttribute("loginCustomer") CustomerDTO customer, HttpSession session, Model model,
                         @RequestParam(required = false) Boolean returnToBook, @RequestParam(required = false) Long roomId) {
         CustomerResponseDTO responseDTO = customerService.loginCustomer(customer.getEmail(), customer.getPassword());
-        if (responseDTO.getFeedback() == Feedback.OK) {
+        if (responseDTO.getFeedback() == Feedback.OK && responseDTO.getCustomerDTO() != null) {
             return getRerouteForValidSignIn(session, responseDTO, returnToBook, roomId);
         }
         model.addAttribute("error", responseDTO.getFeedback().feedback);
@@ -90,7 +90,7 @@ public class FrontendController {
     public String signup(@ModelAttribute("signupCustomer") CustomerDTO customer, HttpSession session, Model model,
                          @RequestParam(required = false) Boolean returnToBook, @RequestParam(required = false) Long roomId) {
         CustomerResponseDTO responseDTO = customerService.signupCustomer(customer);
-        if (responseDTO.getFeedback() == Feedback.OK) {
+        if (responseDTO.getFeedback() == Feedback.OK && responseDTO.getCustomerDTO() != null) {
             return getRerouteForValidSignIn(session, responseDTO, returnToBook, roomId);
         }
         model.addAttribute("signupError", responseDTO.getFeedback().feedback);

@@ -25,6 +25,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/",
                                 "/home",
+                                "/error",
                                 "/room",
                                 "/favicon.ico",
                                 "/search",
