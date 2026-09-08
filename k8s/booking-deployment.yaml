@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
         - name: booking-service
-          image: booking-service:latest
-          imagePullPolicy: Never
+          image: pensionat-microservices-booking-service:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
           env:

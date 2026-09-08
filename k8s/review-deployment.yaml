@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
         - name: review-service
-          image: review-service:latest
-          imagePullPolicy: Never
+          image: pensionat-microservices-review-service:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8082
           env:

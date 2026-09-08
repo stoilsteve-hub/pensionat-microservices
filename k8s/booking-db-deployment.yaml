@@ -23,7 +23,8 @@ spec:
             - name: MYSQL_DATABASE
               value: bookify
             - name: MYSQL_ROOT_PASSWORD
-              value: root          volumeMounts:
+              value: root
+          volumeMounts:
             - name: mysql-persistent-storage
               mountPath: /var/lib/mysql
       volumes:

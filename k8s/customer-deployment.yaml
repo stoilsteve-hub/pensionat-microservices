@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
         - name: customer-service
-          image: customer-service:latest
-          imagePullPolicy: Never
+          image: pensionat-microservices-customer-service:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8081
           env:
