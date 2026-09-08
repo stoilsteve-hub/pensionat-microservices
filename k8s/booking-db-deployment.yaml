@@ -23,4 +23,10 @@ spec:
             - name: MYSQL_DATABASE
               value: bookify
             - name: MYSQL_ROOT_PASSWORD
-              value: root
+              value: root          volumeMounts:
+            - name: mysql-persistent-storage
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: booking-db-pvc
