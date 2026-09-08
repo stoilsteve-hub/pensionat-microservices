@@ -1,50 +1,73 @@
-# Guest House Booking System
+# Pensionat Microservices
 
-This is a project for our course assignment where we built a web application in Java to manage a small guest house. The system is designed to handle customers, rooms, and room bookings.
+A microservices-based booking and management system for a pensionat / guest house. Built with Java 17 and Spring Boot, containerized with Docker, and deployable via Docker Compose or Kubernetes.
 
-## Project Overview
+## Architecture & Services
 
-The application is built using Java 17 and Spring Boot (version 3.3.5). For data storage, we use a cloud-hosted MySQL database on Aiven, implemented with a code-first approach using Spring Data JPA. The frontend is built with Thymeleaf, HTML, CSS, and JavaScript. 
+The system consists of three independent Spring Boot microservices:
 
-The codebase is strictly structured into Controller, Service, and Repository layers to keep the business logic organized and separated.
+- **booking-service** (Port `8080`): Handles room inventory, availability checks, and booking creation/cancellation. Includes frontend templates.
+- **customer-service** (Port `8081`): Manages customer registration, authentication, and profile data.
+- **review-service** (Port `8082`): Manages customer reviews and ratings.
 
-## Core Models
+## Tech Stack
 
-Our system revolves around three main entity classes in the database:
-- **Customer:** Stores customer details.
-- **Room:** Represents the physical rooms in the guest house.
-- **Booking:** Manages the reservation of rooms by customers. We also use a `BookingDTO` for transferring data securely between the frontend and backend.
+- **Backend:** Java 17, Spring Boot 3
+- **Data & Persistence:** Spring Data JPA, MySQL / H2
+- **Containerization & Orchestration:** Docker, Docker Compose, Kubernetes (`k8s/`)
+- **Testing:** JUnit 5, Mockito, Testcontainers
 
-## Implemented Features
+## Prerequisites
 
-### Customers
-- Register a new customer.
-- Update customer information.
-- Delete a customer account (the system ensures this is only possible if the customer has no active bookings).
+- JDK 17 or higher
+- Maven 3.8+
+- Docker & Docker Compose (optional for containerized run)
 
-### Rooms
-- The system manages our rooms which are created and managed in the database.
-- Room types include single rooms and double rooms.
-- Double rooms have the option to add an extra bed during the booking process.
+## Running Locally
 
-### Bookings
-- Customers can book an available room for one or more nights.
-- Existing bookings can be updated or canceled.
-- The system includes validation to prevent double-booking a room on the exact same dates.
+### Option 1: Using Docker Compose
 
-### Search Functionality
-- Users can search for available rooms by specifying a single date or a date range.
+Start all microservices and databases simultaneously:
 
-## Technical Details
-- **Backend:** Java 17, Spring Boot
-- **Database:** MySQL (Cloud-hosted via Aiven)
-- **Frontend:** Thymeleaf
-- **Security:** We use `spring-security-crypto` for password hashing and security.
-- **Testing:** We have written 15 unit tests across `BookingServiceTest`, `CustomerServiceTest`, and `RoomServiceTest` to verify the core business logic. This comfortably fulfills the requirement of at least 5 service-layer tests.
+```bash
+docker compose up --build
+```
 
-## How to Run
-1. Clone the repository to your local machine.
-2. Open the project in your IDE.
-3. Ensure the environment variable `DB_PASSWORD` is set with the correct MySQL database password for our Aiven instance.
-4. Run the Spring Boot application.
-5. The database tables will be updated automatically via Hibernate, and the application can be accessed via the web browser.
+### Option 2: Running Services Individually
+
+Build and run each service with Maven:
+
+```bash
+# 1. Booking Service
+cd booking-service
+mvn spring-boot:run
+
+# 2. Customer Service
+cd ../customer-service
+mvn spring-boot:run
+
+# 3. Review Service
+cd ../review-service
+mvn spring-boot:run
+```
+
+## Running Tests
+
+Run unit tests for any service using Maven:
+
+```bash
+# Booking service tests
+cd booking-service
+mvn test
+
+# RoomService unit tests only
+mvn test -Dtest=RoomServiceTest
+```
+
+## Kubernetes Deployment
+
+Manifests for Kubernetes deployments, services, and persistent volume claims are located in the `k8s/` directory:
+
+```bash
+kubectl apply -f k8s/
+```
